@@ -1,0 +1,9 @@
+{
+  "name": "NOSIK Hub",
+  "short_name": "NOSIK",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#2563eb",
+  "icons": []
+}

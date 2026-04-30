@@ -1,0 +1,177 @@
+.phone-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--bg-primary);
+}
+
+.phone-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-bottom: 1px solid rgba(230, 237, 243, 0.08);
+  background: var(--bg-surface);
+}
+
+.phone-top h1,
+.phone-card h2,
+.phone-pin h1 {
+  margin: 0;
+}
+
+.phone-top span,
+.phone-card p {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--w-semi);
+}
+
+.phone-main {
+  display: grid;
+  align-content: start;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  padding-bottom: 92px;
+}
+
+.phone-card {
+  display: grid;
+  gap: var(--sp-3);
+  border: 1px solid rgba(230, 237, 243, 0.1);
+  border-radius: var(--r-lg);
+  background: var(--bg-surface);
+  padding: var(--sp-4);
+}
+
+.phone-list {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.phone-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--bg-primary);
+}
+
+.phone-item.is-done {
+  opacity: 0.55;
+}
+
+.tick {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: var(--r-full);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-weight: var(--w-bold);
+}
+
+.phone-add {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--sp-2);
+}
+
+.phone-add input,
+.phone-pin input {
+  min-height: 44px;
+  border: 1px solid rgba(230, 237, 243, 0.12);
+  border-radius: var(--r-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 0 var(--sp-3);
+}
+
+.phone-add button,
+.phone-pin button,
+.phone-action {
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--r-md);
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+  font-weight: var(--w-bold);
+  padding: 0 var(--sp-4);
+}
+
+.phone-nav {
+  position: fixed;
+  left: var(--sp-3);
+  right: var(--sp-3);
+  bottom: var(--sp-3);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  border: 1px solid rgba(230, 237, 243, 0.1);
+  border-radius: var(--r-xl);
+  background: rgba(22, 27, 34, 0.94);
+  backdrop-filter: blur(14px);
+}
+
+.phone-nav button {
+  min-height: 48px;
+  border: 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: var(--w-bold);
+}
+
+.phone-nav button.is-active {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.phone-pin {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-6);
+}
+
+.phone-pin form {
+  width: min(360px, 100vw - 32px);
+  display: grid;
+  gap: var(--sp-3);
+}
+
+.phone-error {
+  color: var(--alert-blast);
+  font-weight: var(--w-bold);
+}
+
+.assist-card {
+  border: 1px solid rgba(212, 168, 67, 0.28);
+  background: rgba(212, 168, 67, 0.12);
+}
+
+.blast-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--sp-4);
+  background: var(--alert-blast);
+}
+
+.blast-overlay div {
+  display: grid;
+  gap: var(--sp-4);
+  text-align: center;
+}
+
+.blast-overlay h1 {
+  font-size: clamp(2.4rem, 14vw, 5rem);
+  line-height: 0.95;
+}
