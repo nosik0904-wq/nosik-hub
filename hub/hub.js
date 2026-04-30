@@ -49,7 +49,10 @@
   }
 
   function syncParentHudScale() {
-    const scale = Math.min(1, Math.max(0.42, (window.innerWidth || PARENT_HUD_WIDTH) / PARENT_HUD_WIDTH));
+    const PARENT_HUD_HEIGHT = 880;
+    const scaleW = (window.innerWidth  || PARENT_HUD_WIDTH)  / PARENT_HUD_WIDTH;
+    const scaleH = (window.innerHeight || PARENT_HUD_HEIGHT) / PARENT_HUD_HEIGHT;
+    const scale  = Math.min(1, Math.max(0.42, Math.min(scaleW, scaleH)));
     document.documentElement.style.setProperty("--parent-hud-scale", scale.toFixed(4));
   }
 

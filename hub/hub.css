@@ -2647,14 +2647,14 @@
 
 .parent-canvas {
   width: calc(1376px * var(--parent-hud-scale, 1));
-  height: calc(1780px * var(--parent-hud-scale, 1));
+  height: calc(880px * var(--parent-hud-scale, 1));
   overflow: visible;
 }
 
 .parent-canvas .parent-home {
   width: 1376px;
-  height: 1780px;
-  min-height: 1780px;
+  height: 880px;
+  min-height: 880px;
   margin: 0;
   border-radius: 24px;
   transform: scale(var(--parent-hud-scale, 1));
