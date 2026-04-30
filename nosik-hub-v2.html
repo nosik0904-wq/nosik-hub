@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOSIK Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a1f3a;--bg2:#212645;--card:rgba(255,255,255,.05);--card2:rgba(255,255,255,.08);--border:rgba(255,255,255,.1);--cu:#d4845a;--cu2:#e8a07a;--tx:#f0ece4;--tx2:rgba(240,236,228,.6);--tx3:rgba(240,236,228,.35);--gn:#4caf87;--bl:#5b9bd5;--am:#f0b429;--rd:#e05a5a;--pu:#9b7ec8;--r:1.25rem;--f:'Outfit',sans-serif;--sf:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--f);background:var(--bg);color:var(--tx);height:100dvh;overflow:hidden;display:flex;align-items:center;justify-content:center;background-image:radial-gradient(ellipse at 20% 50%,rgba(93,107,180,.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(212,132,90,.1) 0%,transparent 50%)}
+.device{width:min(940px,99vw);height:min(670px,98dvh);border-radius:2.5rem;border:2px solid rgba(255,255,255,.12);background:var(--bg2);box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.screen{display:none;flex-direction:column;height:100%}
+.screen.active{display:flex}
+
+/* WELCOME */
+#sw{align-items:center;justify-content:center;gap:2rem;background:radial-gradient(ellipse at center,rgba(93,107,180,.25) 0%,transparent 70%)}
+.wl-logo h1{font-family:var(--sf);font-size:3.5rem;letter-spacing:.18em;background:linear-gradient(135deg,var(--cu2),var(--cu));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
+.wl-logo .tag{font-size:.75rem;color:var(--tx2);letter-spacing:.2em;text-transform:uppercase;text-align:center;margin-top:.3rem}
+.wl-msg{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem 1.5rem;max-width:420px;text-align:center}
+.wl-msg h2{font-family:var(--sf);font-size:1.1rem;margin-bottom:.5rem}
+.wl-msg p{font-size:.78rem;color:var(--tx2);line-height:1.6}
+.wl-widgets{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.6rem}
+.wl-wdg{padding:.25rem .7rem;border-radius:999px;border:1px solid var(--border);font-size:.65rem;color:var(--tx3)}
+.wl-btns{display:flex;gap:1rem;flex-direction:column;align-items:center;width:100%}
+.wl-primary{padding:.9rem 2.5rem;border-radius:999px;background:linear-gradient(135deg,var(--cu2),var(--cu));border:none;color:#fff;font-family:var(--f);font-size:.95rem;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(212,132,90,.4);transition:transform .15s}
+.wl-primary:hover{transform:scale(1.03)}
+.wl-sec{padding:.6rem 1.5rem;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--tx2);font-family:var(--f);font-size:.82rem;cursor:pointer;transition:all .15s}
+.wl-sec:hover{border-color:var(--cu);color:var(--cu)}
+
+/* LOCK SCREEN */
+#sl{align-items:center;justify-content:center;gap:1.75rem;background:radial-gradient(ellipse at center,rgba(93,107,180,.2) 0%,transparent 70%)}
+.ll h1{font-family:var(--sf);font-size:2.8rem;letter-spacing:.15em;background:linear-gradient(135deg,var(--cu2),var(--cu));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
+.ll p{color:var(--tx2);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;text-align:center;margin-top:.2rem}
+.pin-pad{display:flex;flex-direction:column;align-items:center;gap:1rem;width:240px}
+.pin-dots{display:flex;gap:.65rem}
+.pin-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--cu);transition:background .15s}
+.pin-dot.filled{background:var(--cu)}
+.pin-disp{font-size:.95rem;letter-spacing:.2em;color:var(--tx2);height:1.4rem;text-align:center}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;width:100%}
+.pb{aspect-ratio:1;border-radius:50%;border:1.5px solid var(--border);background:var(--card);color:var(--tx);font-family:var(--f);font-size:1.2rem;font-weight:500;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.pb:hover{background:var(--card2);border-color:var(--cu)}
+.pb:active{transform:scale(.93)}
+.pb.del{font-size:.85rem;color:var(--tx2)}
+.qa{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;max-width:340px}
+.qb{padding:.32rem .8rem;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--tx2);font-family:var(--f);font-size:.68rem;cursor:pointer;transition:all .15s;white-space:nowrap}
+.qb:hover{border-color:var(--cu);color:var(--cu);background:rgba(212,132,90,.08)}
+.lh{color:var(--tx3);font-size:.68rem;text-align:center}
+
+/* TOP BAR */
+.tb{display:flex;align-items:center;padding:.75rem 1.3rem;border-bottom:1px solid var(--border);gap:.8rem;flex-shrink:0}
+.tl{display:flex;align-items:center;gap:.6rem;flex:1}
+.mb{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:all .15s;flex-shrink:0}
+.mb:hover{border-color:var(--cu);color:var(--cu)}
+.back-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:all .15s;flex-shrink:0}
+.back-btn:hover{border-color:var(--cu);color:var(--cu)}
+.wz{display:flex;align-items:center;gap:.4rem}
+.wz-ico{font-size:1.1rem}
+.wz-t{font-size:.82rem;font-weight:600;line-height:1.2}
+.wz-d{font-size:.58rem;color:var(--tx2)}
+.tc2{flex:2;text-align:center}
+.hn{font-family:var(--sf);font-size:.95rem;background:linear-gradient(135deg,var(--cu2),var(--cu));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.mb2{display:inline-flex;align-items:center;gap:.3rem;padding:.1rem .5rem;border-radius:999px;font-size:.58rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-top:.12rem}
+.tr{flex:1;text-align:right;line-height:1.2}
+.tm{font-family:var(--sf);font-size:1.3rem;font-weight:600}
+.dt{font-size:.6rem;color:var(--tx2)}
+.lkb{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .15s;flex-shrink:0}
+.lkb:hover{color:var(--cu);border-color:var(--cu)}
+.page-title{font-family:var(--sf);font-size:1.05rem;font-weight:600}
+.page-sub{font-size:.6rem;color:var(--tx2);margin-top:.08rem}
+
+/* PAGE TABS */
+.ptabs{display:flex;gap:.3rem;padding:.6rem 1.1rem .3rem;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.ptabs::-webkit-scrollbar{display:none}
+.ptab{padding:.3rem .75rem;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--tx2);font-family:var(--f);font-size:.68rem;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.ptab.on{background:rgba(212,132,90,.15);border-color:var(--cu);color:var(--cu2)}
+
+/* CONTENT */
+.cnt{flex:1;overflow-y:auto;overflow-x:hidden;padding:.8rem 1.1rem;display:flex;flex-direction:column;gap:.75rem;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+/* FOCUS */
+.fs{background:linear-gradient(135deg,rgba(212,132,90,.12),rgba(93,107,180,.08));border:1px solid rgba(212,132,90,.25);border-radius:var(--r);padding:.75rem .95rem;display:flex;align-items:center;gap:.6rem}
+.fs .ico{font-size:1.25rem;flex-shrink:0}
+.fs-lbl{font-size:.56rem;color:var(--cu2);text-transform:uppercase;letter-spacing:.1em;font-weight:600}
+.fs-txt{font-size:.75rem;color:var(--tx);line-height:1.4;margin-top:.06rem}
+
+/* WIDGET GRID */
+.wg{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.full{grid-column:1/-1}
+
+/* WIDGET CARD */
+.w{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:.75rem .85rem;display:flex;flex-direction:column;gap:.5rem;transition:border-color .15s}
+.w:hover{border-color:rgba(255,255,255,.18)}
+.wh{display:flex;align-items:center;gap:.4rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+.wi{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.78rem;flex-shrink:0}
+.wt{font-weight:600;font-size:.73rem;cursor:pointer}
+.wt:hover{color:var(--cu)}
+.wc{margin-left:auto;background:var(--card2);border-radius:999px;padding:.06rem .4rem;font-size:.6rem;color:var(--tx2);border:1px solid var(--border)}
+
+/* ITEMS */
+.it-row{display:flex;align-items:flex-start;gap:.4rem}
+.dot{width:6px;height:6px;border-radius:50%;margin-top:.32rem;flex-shrink:0}
+.it-t{font-size:.72rem;color:var(--tx);line-height:1.3;flex:1}
+.it-s{font-size:.6rem;color:var(--tx2);margin-top:.06rem}
+.itag{font-size:.56rem;padding:.07rem .38rem;border-radius:999px;border:1px solid;white-space:nowrap;align-self:flex-start;margin-top:.16rem}
+.ppill{display:inline-flex;align-items:center;gap:.2rem;font-size:.56rem;padding:.07rem .38rem;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--tx3);margin-left:auto}
+
+/* CHECKS */
+.ci{display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.2rem 0}
+.cb{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.58rem;transition:all .15s}
+.cb.chk{background:var(--gn);border-color:var(--gn)}
+.ct{font-size:.72rem}
+.ct.done{text-decoration:line-through;color:var(--tx3)}
+.add-btn{display:flex;align-items:center;gap:.3rem;padding:.28rem 0;color:var(--tx3);font-size:.68rem;cursor:pointer;border:none;background:none;font-family:var(--f);transition:color .15s;width:100%}
+.add-btn:hover{color:var(--cu)}
+
+/* SECTION LABEL */
+.slbl{font-size:.56rem;text-transform:uppercase;letter-spacing:.12em;color:var(--tx3);padding:.15rem 0 .05rem;margin-top:.1rem}
+
+/* ALERTS */
+.al{border-radius:.65rem;padding:.5rem .65rem;display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.35rem}
+.al:last-child{margin-bottom:0}
+.al-n{background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.2)}
+.al-k{background:rgba(212,132,90,.1);border:1px solid rgba(212,132,90,.3)}
+.al-b{background:rgba(224,90,90,.12);border:1px solid rgba(224,90,90,.35)}
+.al-ico{font-size:.9rem;flex-shrink:0;margin-top:.05rem}
+.al-txt{font-size:.72rem;line-height:1.3;flex:1}
+.al-meta{font-size:.58rem;color:var(--tx3);margin-top:.16rem}
+.alc{display:flex;gap:.32rem;flex-wrap:wrap}
+.acb{flex:1;padding:.38rem;border-radius:.5rem;border:1px solid var(--border);background:var(--card);color:var(--tx2);font-family:var(--f);font-size:.64rem;cursor:pointer;transition:all .15s;text-align:center}
+.acb:hover{border-color:var(--cu);color:var(--cu)}
+.acb.blast{border-color:rgba(224,90,90,.5);color:var(--rd);background:rgba(224,90,90,.06)}
+.acb.blast:hover{background:rgba(224,90,90,.15)}
+
+/* BLAST INPUT */
+.brow{display:flex;gap:.32rem;margin-top:.3rem}
+.binp{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:.5rem;padding:.38rem .6rem;color:var(--tx);font-family:var(--f);font-size:.68rem;outline:none}
+.binp:focus{border-color:var(--cu)}
+.binp::placeholder{color:var(--tx3)}
+.bsnd{padding:.38rem .6rem;border-radius:.5rem;border:none;background:var(--rd);color:#fff;font-family:var(--f);font-size:.68rem;cursor:pointer;transition:opacity .15s}
+.bsnd:hover{opacity:.85}
+
+/* BILLS */
+.bill-row{display:flex;align-items:center;gap:.6rem;padding:.5rem .7rem;background:var(--card);border:1px solid var(--border);border-radius:.75rem;margin-bottom:.35rem;transition:border-color .15s}
+.bill-row:hover{border-color:rgba(255,255,255,.18)}
+.bill-row:last-child{margin-bottom:0}
+.bill-ico{font-size:1rem;flex-shrink:0}
+.bill-info{flex:1}
+.bill-name{font-size:.75rem;font-weight:500}
+.bill-due{font-size:.62rem;color:var(--tx2);margin-top:.05rem}
+.bill-amt{font-size:.88rem;font-weight:700;margin-left:auto}
+.bill-status{font-size:.58rem;padding:.08rem .45rem;border-radius:999px;margin-left:.5rem;white-space:nowrap}
+.bs-over{background:rgba(224,90,90,.15);color:var(--rd);border:1px solid rgba(224,90,90,.3)}
+.bs-due{background:rgba(240,180,41,.12);color:var(--am);border:1px solid rgba(240,180,41,.3)}
+.bs-up{background:rgba(91,155,213,.1);color:var(--bl);border:1px solid rgba(91,155,213,.25)}
+.bs-paid{background:rgba(76,175,135,.1);color:var(--gn);border:1px solid rgba(76,175,135,.25)}
+.bills-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:.75rem}
+.bs-card{background:var(--card);border:1px solid var(--border);border-radius:.875rem;padding:.7rem .9rem;text-align:center}
+.bs-val{font-family:var(--sf);font-size:1.35rem;font-weight:600}
+.bs-lbl{font-size:.58rem;color:var(--tx3);margin-top:.08rem}
+
+/* CALENDAR */
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1.1rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.cal-month{font-family:var(--sf);font-size:1.1rem;font-weight:600}
+.cal-nav{display:flex;gap:.4rem}
+.cal-nav button{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--tx2);cursor:pointer;font-size:.8rem;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.cal-nav button:hover{border-color:var(--cu);color:var(--cu)}
+.cal-grid-wrap{padding:.75rem 1.1rem .4rem;flex-shrink:0}
+.cal-daynames{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;margin-bottom:.3rem}
+.cal-dn{font-size:.58rem;text-align:center;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem}
+.cal-day{height:44px;border-radius:.6rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.12rem;cursor:pointer;transition:all .15s;border:1px solid transparent;position:relative}
+.cal-day:hover{background:var(--card);border-color:var(--border)}
+.cal-day.today{background:rgba(212,132,90,.15);border-color:rgba(212,132,90,.4)}
+.cal-day.selected{background:rgba(212,132,90,.25);border-color:var(--cu)}
+.cal-day.other-month .cal-num{color:var(--tx3)}
+.cal-num{font-size:.78rem;font-weight:500;line-height:1}
+.cal-dots{display:flex;gap:2px}
+.cal-dot{width:4px;height:4px;border-radius:50%}
+.cal-events{flex:1;overflow-y:auto;padding:.5rem 1.1rem .8rem}
+.cal-ev-header{font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:var(--tx3);padding:.25rem 0 .5rem}
+.cal-ev{display:flex;align-items:flex-start;gap:.55rem;padding:.5rem .7rem;background:var(--card);border:1px solid var(--border);border-radius:.75rem;margin-bottom:.35rem;transition:border-color .15s}
+.cal-ev:hover{border-color:rgba(255,255,255,.18)}
+.cal-ev-time{font-size:.68rem;color:var(--tx2);min-width:48px;margin-top:.05rem;font-weight:500}
+.cal-ev-body{flex:1}
+.cal-ev-title{font-size:.76rem;font-weight:500}
+.cal-ev-sub{font-size:.62rem;color:var(--tx2);margin-top:.06rem}
+.cal-ev-bar{width:3px;border-radius:2px;align-self:stretch;flex-shrink:0}
+.cal-ev-vis{font-size:.55rem;padding:.06rem .35rem;border-radius:999px;background:rgba(255,255,255,.06);color:var(--tx3);border:1px solid var(--border);margin-left:auto;align-self:flex-start;margin-top:.08rem;white-space:nowrap}
+
+/* TASKS PAGE */
+.task-item{display:flex;align-items:center;gap:.55rem;padding:.55rem .7rem;background:var(--card);border:1px solid var(--border);border-radius:.75rem;margin-bottom:.35rem;transition:all .15s}
+.task-item:hover{border-color:rgba(255,255,255,.18)}
+.task-cb{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;transition:all .15s}
+.task-cb.chk{background:var(--gn);border-color:var(--gn)}
+.task-body{flex:1}
+.task-name{font-size:.76rem;font-weight:500}
+.task-name.done{text-decoration:line-through;color:var(--tx3)}
+.task-meta{font-size:.62rem;color:var(--tx2);margin-top:.05rem}
+.task-who{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:600;flex-shrink:0}
+.task-badge{font-size:.56rem;padding:.06rem .4rem;border-radius:999px;border:1px solid;flex-shrink:0;white-space:nowrap}
+
+/* GROCERIES PAGE */
+.groc-cat{margin-bottom:.75rem}
+.groc-cat-label{font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:var(--tx3);padding:.3rem 0 .4rem;display:flex;align-items:center;gap:.4rem}
+.groc-cat-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.groc-item{display:flex;align-items:center;gap:.5rem;padding:.4rem .65rem;background:var(--card);border:1px solid var(--border);border-radius:.65rem;margin-bottom:.3rem;cursor:pointer;transition:all .15s}
+.groc-item:hover{border-color:rgba(255,255,255,.18)}
+.groc-item.done-item{opacity:.5}
+.groc-text{font-size:.74rem;flex:1}
+.groc-text.done{text-decoration:line-through;color:var(--tx3)}
+.groc-qty{font-size:.62rem;color:var(--tx2);margin-left:auto}
+.groc-add-row{display:flex;gap:.4rem;margin-top:.3rem}
+.groc-add-inp{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:.55rem;padding:.38rem .6rem;color:var(--tx);font-family:var(--f);font-size:.7rem;outline:none}
+.groc-add-inp:focus{border-color:var(--cu)}
+.groc-add-inp::placeholder{color:var(--tx3)}
+.groc-add-btn{padding:.38rem .7rem;border-radius:.55rem;border:none;background:var(--cu);color:#fff;font-family:var(--f);font-size:.7rem;cursor:pointer;transition:opacity .15s}
+.groc-add-btn:hover{opacity:.85}
+.basics-toggle{display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;background:rgba(76,175,135,.06);border:1px solid rgba(76,175,135,.2);border-radius:.75rem;cursor:pointer;margin-bottom:.5rem}
+.basics-toggle-txt{font-size:.72rem;color:var(--gn);flex:1}
+.basics-toggle-ico{font-size:.85rem;transition:transform .2s}
+.basics-toggle.open .basics-toggle-ico{transform:rotate(90deg)}
+
+/* MAINTENANCE */
+.maint-item{display:flex;align-items:center;gap:.55rem;padding:.55rem .7rem;background:var(--card);border:1px solid var(--border);border-radius:.75rem;margin-bottom:.35rem;transition:border-color .15s}
+.maint-item:hover{border-color:rgba(255,255,255,.18)}
+.maint-ico{font-size:1.1rem;flex-shrink:0;width:28px;text-align:center}
+.maint-body{flex:1}
+.maint-name{font-size:.76rem;font-weight:500}
+.maint-meta{font-size:.62rem;color:var(--tx2);margin-top:.05rem}
+.maint-status{font-size:.58rem;padding:.07rem .42rem;border-radius:999px;flex-shrink:0;white-space:nowrap}
+.ms-ok{background:rgba(76,175,135,.1);color:var(--gn);border:1px solid rgba(76,175,135,.25)}
+.ms-due{background:rgba(240,180,41,.12);color:var(--am);border:1px solid rgba(240,180,41,.3)}
+.ms-over{background:rgba(224,90,90,.12);color:var(--rd);border:1px solid rgba(224,90,90,.3)}
+
+/* TICKER */
+.ticker{height:30px;background:rgba(0,0,0,.3);border-top:1px solid var(--border);display:flex;align-items:center;overflow:hidden;flex-shrink:0}
+.ticker-inner{display:flex;animation:scroll 34s linear infinite;white-space:nowrap}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tmsg{font-size:.64rem;color:var(--tx2);padding:0 3.5rem;letter-spacing:.04em}
+.tmsg .lbl{font-weight:700;letter-spacing:.08em;margin-right:.35rem}
+
+/* SIDE MENU */
+.sm{position:absolute;top:0;left:0;bottom:0;width:225px;background:rgba(26,31,58,.97);backdrop-filter:blur(20px);border-right:1px solid var(--border);border-radius:2.5rem 0 0 2.5rem;z-index:100;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.sm.open{transform:translateX(0)}
+.smo{display:none;position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:99;border-radius:2.5rem}
+.smo.open{display:block}
+.sm-logo{padding:1rem 1.1rem .6rem;border-bottom:1px solid var(--border)}
+.sm-logo h2{font-family:var(--sf);font-size:1.3rem;background:linear-gradient(135deg,var(--cu2),var(--cu));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sm-logo p{font-size:.6rem;color:var(--tx3);letter-spacing:.08em;margin-top:.06rem}
+.sm-items{flex:1;overflow-y:auto;padding:.35rem .6rem}
+.sm-sec{font-size:.54rem;text-transform:uppercase;letter-spacing:.12em;color:var(--tx3);padding:.6rem .45rem .22rem}
+.sm-item{display:flex;align-items:center;gap:.5rem;padding:.45rem .65rem;border-radius:.75rem;cursor:pointer;transition:all .15s;color:var(--tx2);font-size:.73rem}
+.sm-item:hover{background:var(--card2);color:var(--tx)}
+.sm-item.on{background:rgba(212,132,90,.12);color:var(--cu2)}
+.sm-item .ico{font-size:.85rem;width:17px;text-align:center}
+.sm-foot{padding:.6rem;border-top:1px solid var(--border)}
+.sm-lk{width:100%;padding:.45rem;border-radius:.75rem;border:1px solid var(--border);background:var(--card);color:var(--tx3);font-family:var(--f);font-size:.7rem;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.32rem}
+.sm-lk:hover{color:var(--tx2);border-color:rgba(255,255,255,.2)}
+
+/* BLAST OVERLAY */
+.bov{display:none;position:absolute;inset:0;background:rgba(224,90,90,.15);backdrop-filter:blur(8px);z-index:200;border-radius:2.5rem;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;animation:bpulse 2s ease-in-out infinite}
+@keyframes bpulse{0%,100%{background:rgba(224,90,90,.15)}50%{background:rgba(224,90,90,.28)}}
+.bov.active{display:flex}
+.b-emoji{font-size:2.8rem;margin-bottom:.5rem}
+.b-lbl{font-size:.65rem;color:var(--rd);text-transform:uppercase;letter-spacing:.15em;font-weight:700;margin-bottom:.35rem}
+.b-txt{font-family:var(--sf);font-size:1.5rem;font-weight:700;line-height:1.25;color:#fff;max-width:360px;margin-bottom:.55rem;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+.b-from{font-size:.68rem;color:rgba(255,255,255,.45);margin-bottom:1.5rem}
+.b-acc{padding:.8rem 2rem;border-radius:999px;background:var(--rd);border:none;color:#fff;font-family:var(--f);font-size:.9rem;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(224,90,90,.5);transition:transform .15s}
+.b-acc:hover{transform:scale(1.04)}
+
+/* KID */
+.kg{text-align:center;padding:.35rem 0}
+.kg .emo{font-size:1.9rem;margin-bottom:.22rem}
+.kg h2{font-family:var(--sf);font-size:1.2rem}
+.kg p{font-size:.7rem;color:var(--tx2);margin-top:.12rem}
+.kxp{display:flex;align-items:center;gap:.4rem;background:rgba(76,175,135,.1);border:1px solid rgba(76,175,135,.25);border-radius:.875rem;padding:.5rem .75rem}
+.kxp-val{font-size:.85rem;font-weight:700;color:var(--gn);margin-left:auto}
+.req-btn{width:100%;padding:.6rem;border-radius:.875rem;border:1.5px dashed rgba(212,132,90,.4);background:rgba(212,132,90,.04);color:var(--cu2);font-family:var(--f);font-size:.74rem;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.32rem}
+.req-btn:hover{border-color:var(--cu);background:rgba(212,132,90,.1)}
+
+/* GP */
+.gpw{background:linear-gradient(135deg,rgba(76,175,135,.1),rgba(91,155,213,.08));border:1px solid rgba(76,175,135,.2);border-radius:var(--r);padding:.75rem .95rem;text-align:center}
+.gpw h3{font-family:var(--sf);font-size:.9rem;margin-top:.18rem}
+.gpw p{font-size:.68rem;color:var(--tx2);margin-top:.1rem}
+
+/* CARE */
+.care-hdr{display:flex;align-items:center;gap:.65rem;margin-bottom:.65rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+.care-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--pu),var(--bl));display:flex;align-items:center;justify-content:center;font-family:var(--sf);font-size:.95rem;font-weight:600;flex-shrink:0}
+.care-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.cb2{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:.75rem;padding:.55rem .65rem}
+.cb2-lbl{font-size:.56rem;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);margin-bottom:.3rem}
+.cb2-item{display:flex;align-items:center;gap:.3rem;font-size:.68rem;color:var(--tx2);margin-bottom:.2rem}
+
+/* EC */
+.ec{display:flex;align-items:center;gap:.5rem;padding:.42rem .65rem;background:var(--card);border:1px solid var(--border);border-radius:.65rem;cursor:pointer;transition:border-color .15s;margin-bottom:.3rem}
+.ec:hover{border-color:var(--cu)}
+.ec:last-child{margin-bottom:0}
+.ec-ph{font-size:.65rem;color:var(--cu);margin-left:auto;font-weight:600}
+
+/* VAULT */
+.vi{display:flex;align-items:center;gap:.5rem;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.vi:last-child{border-bottom:none}
+
+/* ASSIST */
+.asc{background:linear-gradient(135deg,rgba(155,126,200,.08),rgba(91,155,213,.08));border:1px solid rgba(155,126,200,.3);border-radius:var(--r);padding:.75rem .85rem}
+.asl{font-size:.6rem;color:var(--pu);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:.4rem;display:flex;align-items:center;gap:.35rem}
+.asb{display:flex;gap:.4rem;margin-top:.5rem}
+.asyes{padding:.28rem .7rem;border-radius:999px;background:rgba(155,126,200,.2);border:1px solid var(--pu);color:var(--pu);font-family:var(--f);font-size:.66rem;cursor:pointer}
+.asno{padding:.28rem .7rem;border-radius:999px;background:var(--card);border:1px solid var(--border);color:var(--tx3);font-family:var(--f);font-size:.66rem;cursor:pointer}
+
+/* COLOR HELPERS */
+.bg-cu{background:rgba(212,132,90,.15)}.bg-gn{background:rgba(76,175,135,.15)}.bg-bl{background:rgba(91,155,213,.15)}.bg-am{background:rgba(240,180,41,.15)}.bg-rd{background:rgba(224,90,90,.15)}.bg-pu{background:rgba(155,126,200,.15)}
+.c-cu{color:var(--cu)}.c-gn{color:var(--gn)}.c-bl{color:var(--bl)}.c-am{color:var(--am)}.c-rd{color:var(--rd)}.c-pu{color:var(--pu)}
+.d-cu{background:var(--cu)}.d-gn{background:var(--gn)}.d-bl{background:var(--bl)}.d-am{background:var(--am)}.d-rd{background:var(--rd)}.d-pu{background:var(--pu)}
+.bc-cu{border-color:var(--cu);color:var(--cu)}
+.m-pa{background:rgba(212,132,90,.15);color:var(--cu2)}.m-ki{background:rgba(76,175,135,.15);color:var(--gn)}.m-gp{background:rgba(91,155,213,.15);color:var(--bl)}.m-ca{background:rgba(155,126,200,.15);color:var(--pu)}.m-vi{background:rgba(240,180,41,.15);color:var(--am)}.m-fa{background:rgba(255,255,255,.08);color:var(--tx2)}
+.note{font-size:.6rem;color:var(--tx3);text-align:center;padding:.18rem 0}
+.sr2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-top:.25rem;padding-top:.25rem;border-top:1px solid var(--border)}
+.stat{text-align:center}.sv{font-family:var(--sf);font-size:1.15rem;font-weight:600}.sl{font-size:.56rem;color:var(--tx3);margin-top:.06rem}
+
+/* ADD FORM */
+.add-form{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:.875rem;padding:.65rem .8rem;display:flex;flex-direction:column;gap:.45rem}
+.add-form input,.add-form select{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:.5rem;padding:.38rem .6rem;color:var(--tx);font-family:var(--f);font-size:.7rem;outline:none;width:100%}
+.add-form input:focus,.add-form select:focus{border-color:var(--cu)}
+.add-form input::placeholder{color:var(--tx3)}
+.add-form select option{background:#212645}
+.add-form-row{display:flex;gap:.4rem}
+.add-form .save-btn{padding:.4rem .9rem;border-radius:.5rem;border:none;background:var(--cu);color:#fff;font-family:var(--f);font-size:.7rem;cursor:pointer;transition:opacity .15s}
+.add-form .save-btn:hover{opacity:.85}
+.add-form .cancel-btn{padding:.4rem .7rem;border-radius:.5rem;border:1px solid var(--border);background:var(--card);color:var(--tx2);font-family:var(--f);font-size:.7rem;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="device" id="app">
+
+<div class="smo" id="smo" onclick="closeSM()"></div>
+<nav class="sm" id="sm">
+  <div class="sm-logo"><h2>NOSIK</h2><p>Household Operating System</p></div>
+  <div class="sm-items">
+    <div class="sm-sec">Main</div>
+    <div class="sm-item on" onclick="goHome();closeSM()"><span class="ico">🏠</span> Home</div>
+    <div class="sm-item" onclick="navTo('sc');closeSM()"><span class="ico">📅</span> Calendar</div>
+    <div class="sm-item" onclick="navTo('stasks');closeSM()"><span class="ico">✅</span> Tasks</div>
+    <div class="sm-item" onclick="navTo('sgroc');closeSM()"><span class="ico">🛒</span> Groceries</div>
+    <div class="sm-item" onclick="navTo('salerts');closeSM()"><span class="ico">🔔</span> Alerts</div>
+    <div class="sm-item" onclick="navTo('sbills');closeSM()"><span class="ico">💳</span> Bills</div>
+    <div class="sm-item" onclick="navTo('smaint');closeSM()"><span class="ico">🔧</span> Maintenance</div>
+    <div class="sm-sec">Access</div>
+    <div class="sm-item" id="m-people"><span class="ico">👥</span> People & Access</div>
+    <div class="sm-item" onclick="closeSM()"><span class="ico">🚨</span> Emergency Mode</div>
+    <div class="sm-sec">Manage</div>
+    <div class="sm-item" id="m-settings"><span class="ico">⚙️</span> Settings</div>
+    <div class="sm-item" onclick="closeSM()"><span class="ico">✨</span> NOSIK Assist</div>
+    <div class="sm-item" onclick="closeSM()"><span class="ico">🧹</span> NOSIK Tidy</div>
+    <div class="sm-item" id="m-priv"><span class="ico">🔒</span> Privacy & Security</div>
+    <div class="sm-sec">Optional</div>
+    <div class="sm-item" onclick="closeSM()"><span class="ico">💡</span> Optional Features</div>
+  </div>
+  <div class="sm-foot"><button class="sm-lk" id="sm-lk-btn" onclick="lockHub()">👤 Switch user</button></div>
+</nav>
+
+<div class="bov" id="bov">
+  <div class="b-emoji">🚨</div>
+  <div class="b-lbl">NOSIK BLAST</div>
+  <div class="b-txt" id="btxt">BINS NEED TO GO OUT NOW!</div>
+  <div class="b-from" id="bfrom">From: Dad</div>
+  <button class="b-acc" onclick="acceptBlast()">✓ Accept — I'm on it</button>
+</div>
+
+
+<!-- ══ WELCOME SCREEN ══ -->
+<div class="screen active" id="sw">
+  <div class="wl-logo"><h1>NOSIK</h1><div class="tag">Household Operating System</div></div>
+  <div class="wl-msg">
+    <h2>Your Hub is ready. 👋</h2>
+    <p>Five starter widgets are set up for your household — Today, Next 7 Days, Groceries, Tasks, and Alerts. You can customise everything later.</p>
+    <div class="wl-widgets">
+      <div class="wl-wdg">📅 Today</div><div class="wl-wdg">📆 Next 7 Days</div>
+      <div class="wl-wdg">🛒 Groceries</div><div class="wl-wdg">✅ Tasks</div><div class="wl-wdg">🔔 Alerts</div>
+    </div>
+  </div>
+  <div class="wl-btns">
+    <button class="wl-primary" onclick="go('family')">Start using NOSIK →</button>
+    <button class="wl-sec" onclick="go('family')">Set up my Hub first</button>
+    <div style="font-size:.62rem;color:var(--tx3)">NOSIK will suggest helpful features as you go. No long setup needed.</div>
+  </div>
+</div>
+
+<!-- ══ LOCK / PIN SCREEN ══ -->
+<div class="screen" id="sl">
+  <div class="ll"><h1>NOSIK</h1><p>Household Operating System</p></div>
+  <div class="pin-pad">
+    <div class="pin-dots"><div class="pin-dot" id="d1"></div><div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div><div class="pin-dot" id="d4"></div></div>
+    <div class="pin-disp" id="pd">Enter your PIN</div>
+    <div class="pin-grid">
+      <button class="pb" onclick="pk('1')">1</button><button class="pb" onclick="pk('2')">2</button><button class="pb" onclick="pk('3')">3</button>
+      <button class="pb" onclick="pk('4')">4</button><button class="pb" onclick="pk('5')">5</button><button class="pb" onclick="pk('6')">6</button>
+      <button class="pb" onclick="pk('7')">7</button><button class="pb" onclick="pk('8')">8</button><button class="pb" onclick="pk('9')">9</button>
+      <button class="pb" onclick="pk('')">·</button><button class="pb" onclick="pk('0')">0</button><button class="pb del" onclick="pdel()">⌫</button>
+    </div>
+  </div>
+  <div class="qa">
+    <div class="lh" style="width:100%;margin-bottom:.2rem">Quick access — demo PINs:</div>
+    <button class="qb" onclick="go('carl')">👔 Carl 1234</button>
+    <button class="qb" onclick="go('kim')">👩 Kim 5678</button>
+    <button class="qb" onclick="go('mason')">🎮 Mason 1111</button>
+    <button class="qb" onclick="go('jaxon')">⚽ Jaxon 2222</button>
+    <button class="qb" onclick="go('nan')">👵 Nan 2468</button>
+    <button class="qb" onclick="go('carer')">💜 Sarah 8642</button>
+    <button class="qb" onclick="go('visitor')">🏠 Visitor 9090</button>
+  </div>
+  <button class="qb" style="margin-top:.2rem;border-color:rgba(255,255,255,.15);color:var(--tx3)" onclick="go('family')">← Back to Family View</button>
+</div>
+
+<!-- ══ FAMILY VIEW ══ -->
+<div class="screen" id="sf">
+  <div class="tb">
+    <div class="tl"><button class="mb" onclick="openSM()">☰</button>
+      <div class="wz"><div class="wz-ico">⛅</div><div><div class="wz-t">24°</div><div class="wz-d">Brisbane · Partly cloudy</div></div></div></div>
+    <div class="tc2"><div class="hn">NOSIK Hub</div><div class="mb2 m-fa">👨‍👩‍👧‍👦 Family View</div></div>
+    <div class="tr"><div class="tm" id="tf">4:38 PM</div><div class="dt">Wed, 30 Apr</div></div>
+    <button class="lkb" onclick="lockHub()" title="Switch user">👤</button>
+  </div>
+  <div class="cnt">
+    <div class="fs"><div class="ico">📌</div><div><div class="fs-lbl">Today's Focus</div><div class="fs-txt">Bins out tonight · Jaxon soccer 5:30pm · Milk needed · Mason's birthday tomorrow 🎂</div></div></div>
+    <div class="wg">
+      <div class="w"><div class="wh"><div class="wi bg-bl"><span class="c-bl">📅</span></div><div class="wt" onclick="navTo('sc')">Today</div><div class="wc">4 events</div></div>
+        <div class="it-row"><div class="dot d-bl"></div><div><div class="it-t">School — normal day</div><div class="it-s">All kids · 8:30 AM</div></div></div>
+        <div class="it-row"><div class="dot d-cu"></div><div><div class="it-t">Jaxon soccer training</div><div class="it-s">Suncorp · 5:30 PM</div></div><div class="itag bc-cu">🚗 Dad</div></div>
+        <div class="it-row"><div class="dot d-am"></div><div><div class="it-t">Bins night 🗑️</div><div class="it-s">Before dark</div></div></div>
+        <div class="it-row"><div class="dot d-gn"></div><div><div class="it-t">Family dinner · Pasta bake</div><div class="it-s">7:00 PM</div></div></div>
+      </div>
+      <div class="w"><div class="wh"><div class="wi bg-cu"><span class="c-cu">📆</span></div><div class="wt" onclick="navTo('sc')">Next 7 Days</div></div>
+        <div class="it-row"><div class="dot d-gn"></div><div><div class="it-t">🎂 Mason's birthday — 14!</div><div class="it-s">Thursday</div></div></div>
+        <div class="it-row"><div class="dot d-bl"></div><div><div class="it-t">School sports day</div><div class="it-s">Friday · all kids</div></div></div>
+        <div class="it-row"><div class="dot d-cu"></div><div><div class="it-t">Nan visiting 🤗</div><div class="it-s">Saturday 10 AM</div></div></div>
+        <div class="it-row"><div class="dot d-am"></div><div><div class="it-t">Recycle bins 🗑️</div><div class="it-s">Next Wednesday</div></div></div>
+      </div>
+      <div class="w"><div class="wh"><div class="wi bg-gn"><span class="c-gn">🛒</span></div><div class="wt" onclick="navTo('sgroc')">Groceries</div><div class="wc">5 items</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb chk">✓</div><div class="ct done">Bread</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Milk — 2L full cream</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Pasta — penne</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Canned tomatoes × 3</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Apples × 6</div></div>
+        <button class="add-btn" onclick="navTo('sgroc')">＋ See full list / Add item</button>
+      </div>
+      <div class="w"><div class="wh"><div class="wi bg-am"><span class="c-am">✅</span></div><div class="wt" onclick="navTo('stasks')">Chores Today</div><div class="wc">4 jobs</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb chk">✓</div><div class="ct done">Dishes (Mason)</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Take bins out (Jaxon)</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Vacuum lounge (Mason)</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Tidy toys (Easton + Hudson)</div></div>
+        <button class="add-btn" onclick="navTo('stasks')">＋ See all tasks</button>
+      </div>
+      <div class="w full"><div class="wh"><div class="wi bg-rd"><span class="c-rd">🔔</span></div><div class="wt" onclick="navTo('salerts')">Alerts</div><div class="wc">2 active</div></div>
+        <div class="al al-n"><div class="al-ico">💬</div><div><div class="al-txt">Please bring washing in before dinner.</div><div class="al-meta">NUDGE · Kim · 3:15 PM</div></div></div>
+        <div class="al al-k"><div class="al-ico">🔔</div><div><div class="al-txt">Bins need to go out before dark — Jaxon's job tonight!</div><div class="al-meta">KNOCK · Carl · 4:10 PM</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="ticker"><div class="ticker-inner">
+    <span class="tmsg"><span class="lbl">NUDGE</span> Ready when you are. Tap any widget header to see the full page.</span>
+    <span class="tmsg"><span class="lbl">TODAY</span> Bins out tonight · Soccer 5:30 PM · Pasta bake · Mason's birthday tomorrow 🎂</span>
+    <span class="tmsg"><span class="lbl">NUDGE</span> Ready when you are. Tap any widget header to see the full page.</span>
+    <span class="tmsg"><span class="lbl">TODAY</span> Bins out tonight · Soccer 5:30 PM · Pasta bake · Mason's birthday tomorrow 🎂</span>
+  </div></div>
+</div>
+
+<!-- ══ PARENT VIEW ══ -->
+<div class="screen" id="spar">
+  <div class="tb">
+    <div class="tl"><button class="mb" onclick="openSM()">☰</button>
+      <div class="wz"><div class="wz-ico">⛅</div><div><div class="wz-t">24°</div><div class="wz-d">Brisbane</div></div></div></div>
+    <div class="tc2"><div class="hn">NOSIK Hub</div><div class="mb2 m-pa" id="pbadge">👔 Carl · Parent</div></div>
+    <div class="tr"><div class="tm" id="tp">4:38 PM</div><div class="dt">Wed, 30 Apr</div></div>
+    <button class="lkb" onclick="lockHub()" title="Back to Family View">✕</button>
+  </div>
+  <div class="cnt">
+    <div class="fs"><div class="ico">📌</div><div><div class="fs-lbl">Your Focus Today</div><div class="fs-txt">Easton therapy 12:30 · Soccer 5:30 — you're driving · Electricity $312 due Fri · Car rego due 15 May ⚠️</div></div></div>
+    <div class="wg">
+      <div class="w"><div class="wh"><div class="wi bg-bl"><span class="c-bl">📅</span></div><div class="wt" onclick="navTo('sc')">Today</div><div class="wc">6 events</div></div>
+        <div class="it-row"><div class="dot d-bl"></div><div><div class="it-t">School — normal day</div><div class="it-s">All kids · 8:30 AM</div></div></div>
+        <div class="it-row"><div class="dot d-pu"></div><div><div class="it-t">Easton therapy — Dr Nguyen</div><div class="it-s">12:30 PM · Kim attending</div></div><div class="ppill">🔒 Parents</div></div>
+        <div class="it-row"><div class="dot d-cu"></div><div><div class="it-t">Jaxon soccer training</div><div class="it-s">Suncorp · 5:30 PM</div></div><div class="itag bc-cu">🚗 You</div></div>
+        <div class="it-row"><div class="dot d-rd"></div><div><div class="it-t">Anniversary dinner — 14 days</div></div><div class="ppill">🔒 Carl</div></div>
+        <div class="it-row"><div class="dot d-gn"></div><div><div class="it-t">Family dinner · Pasta bake</div><div class="it-s">7:00 PM</div></div></div>
+      </div>
+      <div class="w"><div class="wh"><div class="wi bg-am"><span class="c-am">💳</span></div><div class="wt" onclick="navTo('sbills')">Bills Due</div><div class="wc">3 this week</div></div>
+        <div class="vi"><div class="vico c-rd">Electricity</div><div style="flex:1"></div><div style="font-size:.62rem;color:var(--rd)">Fri</div><div style="font-size:.8rem;font-weight:700;margin-left:.5rem" class="c-am">$312</div></div>
+        <div class="vi" style="border-bottom:1px solid rgba(255,255,255,.04)"><div class="vico">Spotify Family</div><div style="flex:1"></div><div style="font-size:.62rem;color:var(--tx2)">Sun</div><div style="font-size:.8rem;font-weight:700;margin-left:.5rem">$23</div></div>
+        <div class="vi"><div class="vico">Car insurance</div><div style="flex:1"></div><div style="font-size:.62rem;color:var(--tx2)">8 May</div><div style="font-size:.8rem;font-weight:700;margin-left:.5rem">$189</div></div>
+        <div class="sr2">
+          <div class="stat"><div class="sv c-am">$525</div><div class="sl">This week</div></div>
+          <div class="stat"><div class="sv">$1,840</div><div class="sl">This month</div></div>
+          <div class="stat"><div class="sv c-gn">+$340</div><div class="sl">Offset</div></div>
+        </div>
+      </div>
+      <div class="w"><div class="wh"><div class="wi bg-gn"><span class="c-gn">🛒</span></div><div class="wt" onclick="navTo('sgroc')">Groceries</div><div class="wc">6 items</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb chk">✓</div><div class="ct done">Bread</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Milk — 2L full cream</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Pasta · Canned tomatoes · Cheese</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Mason birthday cake stuff 🎂</div></div>
+        <button class="add-btn" onclick="navTo('sgroc')">＋ Full list</button>
+      </div>
+      <div class="w"><div class="wh"><div class="wi bg-pu"><span class="c-pu">🔐</span></div><div class="wt">Vault</div></div>
+        <div class="vi"><span>🚗</span><span style="flex:1;font-size:.72rem;margin-left:.4rem">Car rego — CX-5</span><span style="font-size:.62rem;color:var(--am)">⚠ 15 May</span></div>
+        <div class="vi"><span>🏠</span><span style="flex:1;font-size:.72rem;margin-left:.4rem">Home insurance</span><span style="font-size:.62rem;color:var(--tx2)">22 Jan</span></div>
+        <div class="vi"><span>🛂</span><span style="flex:1;font-size:.72rem;margin-left:.4rem">Carl passport</span><span style="font-size:.62rem;color:var(--tx2)">Oct 26</span></div>
+        <div class="vi"><span>🦷</span><span style="flex:1;font-size:.72rem;margin-left:.4rem">Kids dental</span><span style="font-size:.62rem;color:var(--tx2)">Jun</span></div>
+      </div>
+      <div class="w full"><div class="wh"><div class="wi bg-rd"><span class="c-rd">🔔</span></div><div class="wt" onclick="navTo('salerts')">Alerts</div><div class="wc">send / manage</div></div>
+        <div class="al al-n"><div class="al-ico">💬</div><div><div class="al-txt">Please bring washing in before dinner.</div><div class="al-meta">NUDGE · Kim · 3:15 PM</div></div></div>
+        <div class="al al-k"><div class="al-ico">🔔</div><div><div class="al-txt">Bins out before dark — Jaxon's job!</div><div class="al-meta">KNOCK · Carl · 4:10 PM · ✓ Accepted by Jaxon 4:18</div></div></div>
+        <div class="slbl" style="margin-top:.2rem">Send alert</div>
+        <div class="alc"><button class="acb" onclick="sndNudge()">💬 Nudge</button><button class="acb" onclick="sndKnock()">🔔 Knock</button><button class="acb blast" onclick="showBlast('')">🚨 Blast</button></div>
+        <div class="brow"><input class="binp" id="bmsg" placeholder="Type a Blast message…"><button class="bsnd" onclick="fireBlast()">🚨 Send</button></div>
+      </div>
+      <div class="asc full"><div class="asl">✨ NOSIK Assist</div>
+        <div style="font-size:.74rem;color:var(--tx);line-height:1.4">You added "car rego" to the Vault. Want me to turn on Vehicle Tracking so rego, insurance, and servicing all stay in one place?</div>
+        <div class="asb"><button class="asyes">✓ Turn on Vehicles</button><button class="asno">Not now</button><button class="asno">Don't suggest this</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="ticker"><div class="ticker-inner">
+    <span class="tmsg"><span class="lbl c-cu">PARENT</span> Car rego 15 May ⚠ · Electricity $312 due Fri · Anniversary — 14 days to plan</span>
+    <span class="tmsg"><span class="lbl c-cu">TODAY</span> Easton therapy 12:30 · Soccer 5:30 — driving · Bins tonight</span>
+    <span class="tmsg"><span class="lbl c-cu">PARENT</span> Car rego 15 May ⚠ · Electricity $312 due Fri · Anniversary — 14 days to plan</span>
+    <span class="tmsg"><span class="lbl c-cu">TODAY</span> Easton therapy 12:30 · Soccer 5:30 — driving · Bins tonight</span>
+  </div></div>
+</div>
+
+<!-- ══ KID MASON ══ -->
+<div class="screen" id="smas">
+  <div class="tb">
+    <div class="tl"><button class="mb" onclick="openSM()">☰</button></div>
+    <div class="tc2"><div class="hn">NOSIK Hub</div><div class="mb2 m-ki">🎮 Mason Mode</div></div>
+    <div class="tr"><div class="tm" id="tk">4:38 PM</div><div class="dt">Wed, 30 Apr</div></div>
+    <button class="lkb" onclick="lockHub()">✕</button>
+  </div>
+  <div class="cnt">
+    <div class="kg"><div class="emo">👋</div><h2>Hey Mason!</h2><p>Tomorrow's your birthday! 🎂 2 jobs left today.</p></div>
+    <div class="kxp"><div>⭐</div><div style="font-size:.7rem;color:var(--tx2)">This week's points</div><div class="kxp-val">18 pts</div></div>
+    <div class="wg">
+      <div class="w"><div class="wh"><div class="wi bg-am"><span class="c-am">✅</span></div><div class="wt">My Jobs</div><div class="wc">2 left</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb chk">✓</div><div class="ct done">Dishes ✅ +3 pts</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Vacuum lounge room</div></div>
+      </div>
+      <div class="w"><div class="wh"><div class="wi bg-bl"><span class="c-bl">📅</span></div><div class="wt">Today</div></div>
+        <div class="it-row"><div class="dot d-bl"></div><div><div class="it-t">School</div><div class="it-s">8:30 AM</div></div></div>
+        <div class="it-row"><div class="dot d-cu"></div><div><div class="it-t">Jaxon soccer · Dad driving</div><div class="it-s">5:30 PM</div></div></div>
+        <div class="it-row"><div class="dot d-gn"></div><div><div class="it-t">Family dinner</div><div class="it-s">7:00 PM · Pasta bake</div></div></div>
+      </div>
+      <div class="w full"><div class="wh"><div class="wi bg-gn"><span class="c-gn">🛒</span></div><div class="wt" onclick="navTo('sgroc')">Groceries</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb chk">✓</div><div class="ct done">Bread</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Milk</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Pasta · Apples</div></div>
+        <button class="add-btn" onclick="navTo('sgroc')">＋ Add something we need</button>
+      </div>
+    </div>
+    <div class="al al-k"><div class="al-ico">🔔</div><div><div class="al-txt">Bins out before dark — Jaxon's job tonight!</div><div class="al-meta">KNOCK · Dad · 4:10 PM</div></div></div>
+    <button class="req-btn" onclick="toast('📨 Request sent to parents!','var(--cu)')">📨 Send a request to Mum or Dad</button>
+    <div class="note">Bills, vault, private appointments and parent notes are hidden in Kid Mode.</div>
+  </div>
+  <div class="ticker"><div class="ticker-inner">
+    <span class="tmsg"><span class="lbl c-gn">MASON</span> Tomorrow is your birthday! 🎂 Vacuum the lounge and you're done for the day!</span>
+    <span class="tmsg"><span class="lbl c-gn">MASON</span> Tomorrow is your birthday! 🎂 Vacuum the lounge and you're done for the day!</span>
+  </div></div>
+</div>
+
+<!-- ══ KID JAXON ══ -->
+<div class="screen" id="sjax">
+  <div class="tb">
+    <div class="tl"><button class="mb" onclick="openSM()">☰</button></div>
+    <div class="tc2"><div class="hn">NOSIK Hub</div><div class="mb2 m-ki">⚽ Jaxon Mode</div></div>
+    <div class="tr"><div class="tm">4:38 PM</div><div class="dt">Wed, 30 Apr</div></div>
+    <button class="lkb" onclick="lockHub()">✕</button>
+  </div>
+  <div class="cnt">
+    <div class="kg"><div class="emo">⚽</div><h2>Hey Jaxon!</h2><p>Soccer at 5:30 — pack your bag! 3 jobs first.</p></div>
+    <div class="kxp"><div>⭐</div><div style="font-size:.7rem;color:var(--tx2)">This week's points</div><div class="kxp-val">12 pts</div></div>
+    <div class="wg">
+      <div class="w"><div class="wh"><div class="wi bg-am"><span class="c-am">✅</span></div><div class="wt">My Jobs</div><div class="wc">3 left</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Take bins out 🗑️</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Feed the dog</div></div>
+        <div class="ci" onclick="tc(this)"><div class="cb"></div><div class="ct">Pack soccer bag</div></div>
+      </div>
+      <div class="w"><div class="wh"><div class="wi bg-cu"><span class="c-cu">⚽</span></div><div class="wt">My Today</div></div>
+        <div class="it-row"><div class="dot d-cu"></div><div><div class="it-t">⚽ Soccer training!</div><div class="it-s">5:30 PM · Dad driving</div></div></div>
+        <div class="it-row"><div class="dot d-gn"></div><div><div class="it-t">Family dinner at home</div><div class="it-s">7:00 PM</div></div></div>
+      </div>
+    </div>
+    <div class="al al-k"><div class="al-ico">🔔</div><div><div class="al-txt c-am">Bins out before dark — that's you, Jaxon!</div><div class="al-meta">KNOCK · Dad · 4:10 PM</div></div></div>
+    <button class="req-btn" onclick="toast('📨 Request sent!','var(--cu)')">📨 Ask Mum or Dad something</button>
+  </div>
+  <div class="ticker"><div class="ticker-inner">
+    <span class="tmsg"><span class="lbl c-gn">JAXON</span> Soccer at 5:30 — pack your bag! · Bins out before dark · Feed the dog first</span>
+    <span class="tmsg"><span class="lbl c-gn">JAXON</span> Soccer at 5:30 — pack your bag! · Bins out before dark · Feed the dog first</span>
+  </div></div>
+</div>
+
+<!-- ══ NAN ══ -->
+<div class="screen" id="snan">
+  <div class="tb">
+    <div class="tl"><button class="mb" onclick="openSM()">☰</button></div>
+    <div class="tc2"><div class="hn">NOSIK Hub</div><div class="mb2 m-gp">👵 Nan's View</div></div>
+    <div class="tr"><div class="tm">4:38 PM</div><div class="dt">Wed, 30 Apr</div></div>
+    <button class="lkb" onclick="lockHub()">✕</button>
+  </div>
+  <div class="cnt">
+    <div class="gpw"><div style="font-size:1.7rem">🤗</div><h3>Hi Nan!</h3><p>The family is looking forward to seeing you this Saturday.</p></div>
+    <div class="wg">
+      <div class="w full"><div class="wh"><div class="wi bg-bl"><span class="c-bl">📅</span></div><div class="wt">Family Calendar</div></div>
+        <div class="it-row"><div class="dot d-gn"></div><div><div class="it-t">🎂 Mason's birthday — turning 14!</div><div class="it-s">Tomorrow — Thursday</div></div></div>
+        <div class="it-row"><div class="dot d-bl"></div><div><div class="it-t">School sports day</div><div class="it-s">Friday · all kids</div></div></div>
+        <div class="it-row"><div class="dot d-cu"></div><div><div class="it-t">Nan visiting 🤗</div><div class="it-s">Saturday · arrives 10 AM</div></div></div>
+        <div class="it-row"><div class="dot d-cu"></div><div><div class="it-t">Jaxon soccer training today</div><div class="it-s">5:30 PM</div></div></div>
+      </div>
+      <div class="w full"><div class="wh"><div class="wi bg-gn"><span class="c-gn">👶</span></div><div class="wt">The Kids</div></div>
+        <div class="it-row"><div class="dot d-bl"></div><div class="it-t">Mason — turning 14 tomorrow 🎂</div></div>
+        <div class="it-row"><div class="dot d-cu"></div><div class="it-t">Jaxon — soccer player ⚽</div></div>
+        <div class="it-row"><div class="dot d-pu"></div><div class="it-t">Easton — loves dinosaurs 🦕</div></div>
+        <div class="it-row"><div class="dot d-gn"></div><div class="it-t">Hudson — the little one 🐣</div></div>
+      </div>
+      <div class="w full"><div class="wh"><div class="wi bg-rd"><span class="c-rd">📞</span></div><div class="wt">Emergency Contacts</div></div>
+        <div class="ec"><div style="font-size:.9rem">👔</div><div><div style="font-size:.74rem;font-weight:500">Carl (Dad)</div></div><div class="ec-ph">0412 000 001</div></div>
+        <div class="ec"><div style="font-size:.9rem">👩</div><div><div style="font-size:.74rem;font-weight:500">Kim (Mum)</div></div><div class="ec-ph">0412 000 002</div></div>
+      </div>
+    </div>
+    <div class="note">Bills, finances, private appointments and sensitive details are not shown in Nan's View.</div>
+  </div>
+  <div class="ticker"><div class="ticker-inner">
+    <span class="tmsg"><span class="lbl c-bl">NAN</span> Visiting Saturday 10 AM · Mason's birthday tomorrow 🎂 · The kids can't wait!</span>
+    <span class="tmsg"><span class="lbl c-bl">NAN</span> Visiting Saturday 10 AM · Mason's birthday tomorrow 🎂 · The kids can't wait!</span>
+  </div></div>
+</div>
+
+<!-- ══ CARER ══ -->
+<div class="screen" id="scar">
+  <div class="tb">
+    <div class="tl"><button class="mb" onclick="openSM()">☰</button></div>
+    <div class="tc2"><div class="hn">NOSIK Hub</div><div class="mb2 m-ca">💜 Easton Care View</div></div>
+    <div class="tr"><div class="tm">4:38 PM</div><div class="dt">Wed, 30 Apr</div></div>
+    <button class="lkb" onclick="lockHub()">✕</button>
+  </div>
+  <div class="cnt">
+    <div class="w"><div class="care-hdr"><div class="care-av">E</div><div><div style="font-family:var(--sf);font-size:.95rem;font-weight:600">Easton's Care View</div><div style="font-size:.6rem;color:var(--tx2)">Welcome Sarah · Wednesday session</div></div><div class="ppill" style="margin-left:auto">🔒 Care only</div></div>
+      <div class="care-grid">
+        <div class="cb2"><div class="cb2-lbl">Schedule</div><div class="cb2-item"><span>🏫</span>School until 3 PM</div><div class="cb2-item"><span>💜</span>Session 3:30–5:00 PM</div><div class="cb2-item"><span>🍝</span>Dinner 7:00 PM</div></div>
+        <div class="cb2"><div class="cb2-lbl">Food Notes</div><div class="cb2-item"><span>✅</span>Pasta is fine</div><div class="cb2-item"><span>✅</span>Loves fruit snacks</div><div class="cb2-item"><span>🚫</span>No dairy (lactose)</div></div>
+        <div class="cb2"><div class="cb2-lbl">Calm-Down</div><div class="cb2-item"><span>🦕</span>Dinosaur toys help</div><div class="cb2-item"><span>🎧</span>Headphones if noisy</div><div class="cb2-item"><span>🚿</span>Shower to reset</div></div>
+        <div class="cb2"><div class="cb2-lbl">Handover</div><div class="cb2-item"><span>📋</span>Check in with Mum</div><div class="cb2-item"><span>✏️</span>Leave handover note</div><div class="cb2-item"><span>📸</span>Log arrival time</div></div>
+      </div>
+    </div>
+    <div class="w"><div class="wh"><div class="wi bg-rd"><span class="c-rd">📞</span></div><div class="wt">Emergency Contacts</div></div>
+      <div class="ec"><div style="font-size:.9rem">👩</div><div><div style="font-size:.74rem;font-weight:500">Kim (Mum)</div><div style="font-size:.6rem;color:var(--tx2)">Primary contact</div></div><div class="ec-ph">0412 000 002</div></div>
+      <div class="ec"><div style="font-size:.9rem">👔</div><div><div style="font-size:.74rem;font-weight:500">Carl (Dad)</div></div><div class="ec-ph">0412 000 001</div></div>
+      <div class="ec"><div style="font-size:.9rem">🏥</div><div><div style="font-size:.74rem;font-weight:500">Dr Nguyen</div><div style="font-size:.6rem;color:var(--tx2)">Easton's specialist</div></div><div class="ec-ph">07 3000 0001</div></div>
+    </div>
+    <div class="note">Easton's care information only. All other family data is hidden.</div>
+  </div>
+  <div class="ticker"><div class="ticker-inner">
+    <span class="tmsg"><span class="lbl c-pu">CARE</span> Easton's session 3:30–5:00 PM · No dairy · Dinosaur toys help · Leave handover note</span>
+    <span class="tmsg"><span class="lbl c-pu">CARE</span> Easton's session 3:30–5:00 PM · No dairy · Dinosaur toys help · Leave handover note</span>
+  </div></div>
+</div>
+
+<!-- ══ VISITOR ══ -->
+<div class="screen" id="svis">
+  <div class="tb">
+    <div class="tl"><button class="mb" onclick="openSM()">☰</button></div>
+    <div class="tc2"><div class="hn">NOSIK Hub</div><div class="mb2 m-vi">🏠 Visitor View</div></div>
+    <div class="tr"><div class="tm">4:38 PM</div><div class="dt">Wed, 30 Apr</div></div>
+    <button class="lkb" onclick="lockHub()">✕</button>
+  </div>
+  <div class="cnt">
+    <div class="fs"><div class="ico">🏠</div><div><div class="fs-lbl">Tonight</div><div class="fs-txt">Kids home by 6 PM · Pasta bake dinner · Parents back by 9 PM · Easton — no dairy ⚠️</div></div></div>
+    <div class="wg">
+      <div class="w"><div class="wh"><div class="wi bg-bl"><span class="c-bl">📋</span></div><div class="wt">House Rules</div></div>
+        <div class="it-row"><div class="dot d-am"></div><div class="it-t">No screens after 8 PM</div></div>
+        <div class="it-row"><div class="dot d-am"></div><div class="it-t">No friends over tonight</div></div>
+        <div class="it-row"><div class="dot d-am"></div><div class="it-t">Homework before games</div></div>
+        <div class="it-row"><div class="dot d-gn"></div><div class="it-t">Snacks in pantry — help yourself</div></div>
+      </div>
+      <div class="w"><div class="wh"><div class="wi bg-am"><span class="c-am">🌙</span></div><div class="wt">Bedtimes</div></div>
+        <div class="it-row"><div class="dot d-bl"></div><div class="it-t">Mason (13) — 9:30 PM</div></div>
+        <div class="it-row"><div class="dot d-cu"></div><div class="it-t">Jaxon (11) — 9:00 PM</div></div>
+        <div class="it-row"><div class="dot d-pu"></div><div class="it-t">Easton (8) — 8:00 PM</div></div>
+        <div class="it-row"><div class="dot d-gn"></div><div class="it-t">Hudson (5) — 7:30 PM</div></div>
+      </div>
+      <div class="w"><div class="wh"><div class="wi bg-gn"><span class="c-gn">🍝</span></div><div class="wt">Dinner Tonight</div></div>
+        <div class="it-row"><div class="dot d-gn"></div><div class="it-t">Pasta bake — in the oven</div></div>
+        <div class="it-row"><div class="dot d-cu"></div><div class="it-t">Garlic bread in freezer</div></div>
+        <div class="it-row"><div class="dot d-am"></div><div class="it-t">⚠️ Easton — no dairy please</div></div>
+      </div>
+      <div class="w"><div class="wh"><div class="wi bg-rd"><span class="c-rd">📞</span></div><div class="wt">Emergency</div></div>
+        <div class="ec"><div style="font-size:.9rem">👔</div><div><div style="font-size:.74rem;font-weight:500">Carl (Dad)</div></div><div class="ec-ph">0412 000 001</div></div>
+        <div class="ec"><div style="font-size:.9rem">👩</div><div><div style="font-size:.74rem;font-weight:500">Kim (Mum)</div></div><div class="ec-ph">0412 000 002</div></div>
+        <div class="ec"><div style="font-size:.9rem">🏥</div><div><div style="font-size:.74rem;font-weight:500">Emergency</div></div><div class="ec-ph">000</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="ticker"><div class="ticker-inner">
+    <span class="tmsg"><span class="lbl c-am">VISITOR</span> Kids home by 6 PM · Pasta bake in oven · No dairy for Easton · Parents back 9 PM · 000</span>
+    <span class="tmsg"><span class="lbl c-am">VISITOR</span> Kids home by 6 PM · Pasta bake in oven · No dairy for Easton · Parents back 9 PM · 000</span>
+  </div></div>
+</div>
+
+
+<!-- ══════════ NEW PAGES ══════════ -->
+
+<!-- ══ CALENDAR PAGE ══ -->
+<div class="screen" id="sc">
+  <div class="tb">
+    <div class="tl"><button class="back-btn" onclick="navBack()">←</button></div>
+    <div class="tc2"><div class="page-title">Calendar</div><div class="page-sub" id="cal-mode-lbl">Household · May 2026</div></div>
+    <div class="tr"><div class="tm" id="tc-t">4:38 PM</div></div>
+    <button class="lkb" onclick="lockHub()" id="cal-lkb">👤</button>
+  </div>
+  <div class="cal-header">
+    <div class="cal-month" id="cal-month">May 2026</div>
+    <div class="cal-nav">
+      <button onclick="calPrev()">‹</button>
+      <button onclick="calNext()">›</button>
+    </div>
+  </div>
+  <div class="cal-grid-wrap">
+    <div class="cal-daynames">
+      <div class="cal-dn">Mon</div><div class="cal-dn">Tue</div><div class="cal-dn">Wed</div><div class="cal-dn">Thu</div><div class="cal-dn">Fri</div><div class="cal-dn">Sat</div><div class="cal-dn">Sun</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+  <div class="cal-events" id="cal-events">
+    <div class="cal-ev-header" id="cal-ev-header">Events — tap a date</div>
+  </div>
+</div>
+
+<!-- ══ TASKS PAGE ══ -->
+<div class="screen" id="stasks">
+  <div class="tb">
+    <div class="tl"><button class="back-btn" onclick="navBack()">←</button></div>
+    <div class="tc2"><div class="page-title">Tasks & Chores</div><div class="page-sub">Household · Wed 30 Apr</div></div>
+    <div class="tr"></div>
+    <button class="lkb" id="tasks-lkb" onclick="lockHub()">👤</button>
+  </div>
+  <div class="ptabs">
+    <div class="ptab on" onclick="filterTasks('all',this)">All</div>
+    <div class="ptab" onclick="filterTasks('carl',this)">Carl</div>
+    <div class="ptab" onclick="filterTasks('kim',this)">Kim</div>
+    <div class="ptab" onclick="filterTasks('mason',this)">Mason</div>
+    <div class="ptab" onclick="filterTasks('jaxon',this)">Jaxon</div>
+    <div class="ptab" onclick="filterTasks('easton',this)">Easton</div>
+    <div class="ptab" onclick="filterTasks('hudson',this)">Hudson</div>
+  </div>
+  <div class="cnt" id="tasks-list">
+    <!-- rendered by JS -->
+  </div>
+</div>
+
+<!-- ══ GROCERIES PAGE ══ -->
+<div class="screen" id="sgroc">
+  <div class="tb">
+    <div class="tl"><button class="back-btn" onclick="navBack()">←</button></div>
+    <div class="tc2"><div class="page-title">Groceries</div><div class="page-sub">9 items · 1 ticked</div></div>
+    <div class="tr"></div>
+    <button class="lkb" id="groc-lkb" onclick="lockHub()">👤</button>
+  </div>
+  <div class="ptabs">
+    <div class="ptab on" onclick="filterGroc('all',this)">All</div>
+    <div class="ptab" onclick="filterGroc('produce',this)">🥦 Produce</div>
+    <div class="ptab" onclick="filterGroc('dairy',this)">🥛 Dairy / Alt</div>
+    <div class="ptab" onclick="filterGroc('meat',this)">🥩 Meat</div>
+    <div class="ptab" onclick="filterGroc('pantry',this)">🥫 Pantry</div>
+    <div class="ptab" onclick="filterGroc('household',this)">🧼 Household</div>
+  </div>
+  <div class="cnt">
+    <div class="basics-toggle" id="basics-toggle" onclick="toggleBasics()">
+      <span class="basics-toggle-ico">›</span>
+      <span class="basics-toggle-txt">Weekly Basics — 12 regular items</span>
+    </div>
+    <div id="basics-list" style="display:none;margin-bottom:.5rem">
+      <div class="groc-item" onclick="tc(this)"><div class="cb chk">✓</div><div class="groc-text done">Bread</div><div class="groc-qty">weekly</div></div>
+      <div class="groc-item" onclick="tc(this)"><div class="cb"></div><div class="groc-text">Milk — 2L full cream</div><div class="groc-qty">weekly</div></div>
+      <div class="groc-item" onclick="tc(this)"><div class="cb"></div><div class="groc-text">Eggs × 12</div><div class="groc-qty">weekly</div></div>
+      <div class="groc-item" onclick="tc(this)"><div class="cb"></div><div class="groc-text">Bananas</div><div class="groc-qty">weekly</div></div>
+      <div class="groc-item" onclick="tc(this)"><div class="cb"></div><div class="groc-text">Dog food — large can</div><div class="groc-qty">weekly</div></div>
+    </div>
+    <div class="groc-cat" id="groc-all">
+      <div class="groc-cat-label">🥦 Produce</div>
+      <div class="groc-item" onclick="tc2(this,'produce')"><div class="cb"></div><div class="groc-text">Apples × 6</div></div>
+      <div class="groc-item" onclick="tc2(this,'produce')"><div class="cb"></div><div class="groc-text">Baby spinach</div></div>
+      <div class="groc-item" onclick="tc2(this,'produce')"><div class="cb"></div><div class="groc-text">Tomatoes × 4</div></div>
+      <div class="groc-cat-label">🥛 Dairy / Alt</div>
+      <div class="groc-item" onclick="tc2(this,'dairy')"><div class="cb"></div><div class="groc-text">Milk — 2L full cream</div></div>
+      <div class="groc-item" onclick="tc2(this,'dairy')"><div class="cb"></div><div class="groc-text">Oat milk × 2 (Easton)</div><div class="groc-qty">dairy-free</div></div>
+      <div class="groc-item" onclick="tc2(this,'dairy')"><div class="cb"></div><div class="groc-text">Cheese — pizza blend</div></div>
+      <div class="groc-cat-label">🥫 Pantry</div>
+      <div class="groc-item" onclick="tc2(this,'pantry')"><div class="cb"></div><div class="groc-text">Pasta — penne</div></div>
+      <div class="groc-item" onclick="tc2(this,'pantry')"><div class="cb chk">✓</div><div class="groc-text done">Bread</div></div>
+      <div class="groc-item" onclick="tc2(this,'pantry')"><div class="cb"></div><div class="groc-text">Canned tomatoes × 3</div></div>
+      <div class="groc-item" onclick="tc2(this,'pantry')"><div class="cb"></div><div class="groc-text">Mason birthday cake ingredients 🎂</div></div>
+      <div class="groc-cat-label">🧼 Household</div>
+      <div class="groc-item" onclick="tc2(this,'household')"><div class="cb"></div><div class="groc-text">Dishwasher tablets</div></div>
+      <div class="groc-item" onclick="tc2(this,'household')"><div class="cb"></div><div class="groc-text">Bin liners — large</div></div>
+    </div>
+    <div class="groc-add-row">
+      <input class="groc-add-inp" id="groc-inp" placeholder="Add item…">
+      <button class="groc-add-btn" onclick="addGrocItem()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ALERTS PAGE ══ -->
+<div class="screen" id="salerts">
+  <div class="tb">
+    <div class="tl"><button class="back-btn" onclick="navBack()">←</button></div>
+    <div class="tc2"><div class="page-title">Alerts</div><div class="page-sub">Nudge · Knock · Blast</div></div>
+    <div class="tr"></div>
+    <button class="lkb" id="alerts-lkb" onclick="lockHub()">👤</button>
+  </div>
+  <div class="ptabs">
+    <div class="ptab on" onclick="alertTab('active',this)">Active (2)</div>
+    <div class="ptab" onclick="alertTab('history',this)">History</div>
+    <div class="ptab" id="send-tab-btn" onclick="alertTab('send',this)">＋ Send</div>
+  </div>
+  <div class="cnt">
+    <div id="alert-active">
+      <div class="slbl">Active alerts</div>
+      <div class="al al-n"><div class="al-ico">💬</div><div style="flex:1"><div class="al-txt">Please bring washing in before dinner.</div><div class="al-meta">NUDGE · Kim · 3:15 PM · Hub</div></div><button onclick="this.closest('.al').remove();toast('✓ Cleared','var(--gn)')" style="border:none;background:none;color:var(--tx3);cursor:pointer;font-size:.75rem;padding:.2rem">✕</button></div>
+      <div class="al al-k"><div class="al-ico">🔔</div><div style="flex:1"><div class="al-txt">Bins need to go out before dark — Jaxon's job tonight!</div><div class="al-meta">KNOCK · Carl · 4:10 PM · ✓ Accepted by Jaxon 4:18 PM</div></div><button onclick="this.closest('.al').remove();toast('✓ Cleared','var(--gn)')" style="border:none;background:none;color:var(--tx3);cursor:pointer;font-size:.75rem;padding:.2rem">✕</button></div>
+    </div>
+    <div id="alert-history" style="display:none">
+      <div class="slbl">Alert history — last 7 days</div>
+      <div class="al al-n"><div class="al-ico">💬</div><div><div class="al-txt">Don't forget dog food on the way home.</div><div class="al-meta">NUDGE · Kim · Yesterday 5:05 PM · Cleared</div></div></div>
+      <div class="al al-k"><div class="al-ico">🔔</div><div><div class="al-txt">Bins out tonight — everyone!</div><div class="al-meta">KNOCK · Carl · Wed last week · ✓ Accepted by Mason 6:02 PM</div></div></div>
+      <div class="al al-b"><div class="al-ico">🚨</div><div><div class="al-txt">DOG IS IN THE FRONT YARD — CLOSE THE GATE!</div><div class="al-meta">BLAST · Carl · Mon · ✓ Accepted by Kim 4:44 PM</div></div></div>
+      <div class="al al-n"><div class="al-ico">💬</div><div><div class="al-txt">Jaxon — homework before dinner please.</div><div class="al-meta">NUDGE · Kim · Mon · Cleared</div></div></div>
+    </div>
+    <div id="alert-send" style="display:none">
+      <div class="slbl">Send a Nudge</div>
+      <div class="w" style="margin-bottom:.5rem">
+        <div style="font-size:.72rem;color:var(--tx2);margin-bottom:.4rem">💬 Soft reminder — scrolls in the ticker</div>
+        <div class="brow"><input class="binp" id="nudge-msg" placeholder="e.g. Please bring washing in…"><button class="bsnd" style="background:var(--am)" onclick="sendAlert('nudge')">Send Nudge</button></div>
+      </div>
+      <div class="slbl">Send a Knock</div>
+      <div class="w" style="margin-bottom:.5rem">
+        <div style="font-size:.72rem;color:var(--tx2);margin-bottom:.4rem">🔔 Important — appears prominently on Hub</div>
+        <div class="brow"><input class="binp" id="knock-msg" placeholder="e.g. Bins out before dark!"><button class="bsnd" style="background:var(--cu)" onclick="sendAlert('knock')">Send Knock</button></div>
+      </div>
+      <div class="slbl">Send a Blast</div>
+      <div class="w" style="background:rgba(224,90,90,.05);border-color:rgba(224,90,90,.25)">
+        <div style="font-size:.72rem;color:var(--rd);margin-bottom:.4rem">🚨 Urgent — full-screen takeover. Must be accepted.</div>
+        <div class="brow"><input class="binp" id="blast-msg2" placeholder="e.g. Dog is outside — check gate!"><button class="bsnd" onclick="sendAlert('blast')">🚨 Send Blast</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BILLS PAGE ══ -->
+<div class="screen" id="sbills">
+  <div class="tb">
+    <div class="tl"><button class="back-btn" onclick="navBack()">←</button></div>
+    <div class="tc2"><div class="page-title">Bills</div><div class="page-sub">May 2026 · 🔒 Parent view only</div></div>
+    <div class="tr"></div>
+    <button class="lkb" id="bills-lkb" onclick="lockHub()">👤</button>
+  </div>
+  <div class="ptabs">
+    <div class="ptab on" onclick="billsTab('all',this)">All</div>
+    <div class="ptab" onclick="billsTab('overdue',this)">Overdue</div>
+    <div class="ptab" onclick="billsTab('upcoming',this)">Upcoming</div>
+    <div class="ptab" onclick="billsTab('paid',this)">Paid</div>
+  </div>
+  <div class="cnt">
+    <div class="bills-summary">
+      <div class="bs-card"><div class="bs-val c-rd">$312</div><div class="bs-lbl">Overdue</div></div>
+      <div class="bs-card"><div class="bs-val c-am">$1,528</div><div class="bs-lbl">Due this month</div></div>
+      <div class="bs-card"><div class="bs-val c-gn">$840</div><div class="bs-lbl">Paid this month</div></div>
+    </div>
+    <div id="bills-list">
+      <div class="slbl">Overdue</div>
+      <div class="bill-row" data-cat="overdue"><div class="bill-ico">⚡</div><div class="bill-info"><div class="bill-name">Electricity — Origin Energy</div><div class="bill-due">Due 28 Apr — overdue!</div></div><div class="bill-amt c-rd">$312.40</div><div class="bill-status bs-over">Overdue</div></div>
+      <div class="slbl">Due this week</div>
+      <div class="bill-row" data-cat="upcoming"><div class="bill-ico">🎵</div><div class="bill-info"><div class="bill-name">Spotify Family</div><div class="bill-due">Due Sunday 4 May</div></div><div class="bill-amt">$22.99</div><div class="bill-status bs-due">Due soon</div></div>
+      <div class="bill-row" data-cat="upcoming"><div class="bill-ico">🌐</div><div class="bill-info"><div class="bill-name">NBN — Aussie Broadband</div><div class="bill-due">Due Tuesday 6 May</div></div><div class="bill-amt">$99.00</div><div class="bill-status bs-due">Due soon</div></div>
+      <div class="slbl">Due this month</div>
+      <div class="bill-row" data-cat="upcoming"><div class="bill-ico">🚗</div><div class="bill-info"><div class="bill-name">Car insurance — NRMA</div><div class="bill-due">Due 8 May</div></div><div class="bill-amt">$189.00</div><div class="bill-status bs-up">Upcoming</div></div>
+      <div class="bill-row" data-cat="upcoming"><div class="bill-ico">🏠</div><div class="bill-info"><div class="bill-name">Council rates — Q2</div><div class="bill-due">Due 15 May</div></div><div class="bill-amt">$680.00</div><div class="bill-status bs-up">Upcoming</div></div>
+      <div class="bill-row" data-cat="upcoming"><div class="bill-ico">📱</div><div class="bill-info"><div class="bill-name">Mobile — Telstra (Carl)</div><div class="bill-due">Due 22 May</div></div><div class="bill-amt">$65.00</div><div class="bill-status bs-up">Upcoming</div></div>
+      <div class="bill-row" data-cat="upcoming"><div class="bill-ico">📱</div><div class="bill-info"><div class="bill-name">Mobile — Telstra (Kim)</div><div class="bill-due">Due 22 May</div></div><div class="bill-amt">$55.00</div><div class="bill-status bs-up">Upcoming</div></div>
+      <div class="slbl">Paid</div>
+      <div class="bill-row" data-cat="paid"><div class="bill-ico">💧</div><div class="bill-info"><div class="bill-name">Water — Urban Utilities</div><div class="bill-due">Paid 15 Apr</div></div><div class="bill-amt c-gn">$148.00</div><div class="bill-status bs-paid">Paid ✓</div></div>
+      <div class="bill-row" data-cat="paid"><div class="bill-ico">🔥</div><div class="bill-info"><div class="bill-name">Gas — AGL</div><div class="bill-due">Paid 8 Apr</div></div><div class="bill-amt c-gn">$112.50</div><div class="bill-status bs-paid">Paid ✓</div></div>
+      <div class="bill-row" data-cat="paid"><div class="bill-ico">🏊</div><div class="bill-info"><div class="bill-name">Jaxon swimming lessons</div><div class="bill-due">Paid 1 Apr</div></div><div class="bill-amt c-gn">$120.00</div><div class="bill-status bs-paid">Paid ✓</div></div>
+    </div>
+    <div id="bills-add-form" style="display:none;margin-top:.5rem">
+      <div class="add-form">
+        <div style="font-size:.7rem;font-weight:600;color:var(--tx2)">Add bill</div>
+        <input placeholder="Bill name (e.g. Electricity)">
+        <div class="add-form-row">
+          <input placeholder="Amount $" style="width:50%">
+          <input type="date" style="width:50%">
+        </div>
+        <div class="add-form-row">
+          <button class="save-btn" onclick="toast('Bill added!','var(--gn)');document.getElementById('bills-add-form').style.display='none'">Save bill</button>
+          <button class="cancel-btn" onclick="document.getElementById('bills-add-form').style.display='none'">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <button class="add-btn" onclick="document.getElementById('bills-add-form').style.display=document.getElementById('bills-add-form').style.display==='none'?'block':'none'">＋ Add bill</button>
+  </div>
+</div>
+
+<!-- ══ MAINTENANCE PAGE ══ -->
+<div class="screen" id="smaint">
+  <div class="tb">
+    <div class="tl"><button class="back-btn" onclick="navBack()">←</button></div>
+    <div class="tc2"><div class="page-title">Home Maintenance</div><div class="page-sub">Tasks · reminders · history</div></div>
+    <div class="tr"></div>
+    <button class="lkb" id="maint-lkb" onclick="lockHub()">👤</button>
+  </div>
+  <div class="ptabs">
+    <div class="ptab on" onclick="maintTab('all',this)">All</div>
+    <div class="ptab" onclick="maintTab('overdue',this)">Overdue</div>
+    <div class="ptab" onclick="maintTab('due',this)">Due soon</div>
+    <div class="ptab" onclick="maintTab('ok',this)">On track</div>
+  </div>
+  <div class="cnt">
+    <div class="slbl">Overdue</div>
+    <div class="maint-item" data-status="overdue"><div class="maint-ico">🔧</div><div class="maint-body"><div class="maint-name">Air filter replacement</div><div class="maint-meta">Every 3 months · Last done: Jan 2026 · Now 1 month overdue</div></div><div class="maint-status ms-over">Overdue</div></div>
+    <div class="maint-item" data-status="overdue"><div class="maint-ico">🪣</div><div class="maint-body"><div class="maint-name">Gutters — clear leaves</div><div class="maint-meta">Every 6 months · Last done: Oct 2025</div></div><div class="maint-status ms-over">Overdue</div></div>
+    <div class="slbl">Due soon</div>
+    <div class="maint-item" data-status="due"><div class="maint-ico">🔩</div><div class="maint-body"><div class="maint-name">Smoke alarm battery test</div><div class="maint-meta">Every 6 months · Due 15 May</div></div><div class="maint-status ms-due">Due in 15d</div></div>
+    <div class="maint-item" data-status="due"><div class="maint-ico">🌿</div><div class="maint-body"><div class="maint-name">Garden — mulch and fertilise</div><div class="maint-meta">Every spring/autumn · Due end of May</div></div><div class="maint-status ms-due">Due in 31d</div></div>
+    <div class="maint-item" data-status="due"><div class="maint-ico">🚿</div><div class="maint-body"><div class="maint-name">Hot water system check</div><div class="maint-meta">Annual · Due June</div></div><div class="maint-status ms-due">Due in 45d</div></div>
+    <div class="slbl">On track</div>
+    <div class="maint-item" data-status="ok"><div class="maint-ico">🏊</div><div class="maint-body"><div class="maint-name">Pool chemical balance</div><div class="maint-meta">Weekly · Last done: Monday</div></div><div class="maint-status ms-ok">Done ✓</div></div>
+    <div class="maint-item" data-status="ok"><div class="maint-ico">🌿</div><div class="maint-body"><div class="maint-name">Lawn mowing</div><div class="maint-meta">Fortnightly · Last done: 20 Apr</div></div><div class="maint-status ms-ok">On track</div></div>
+    <div class="maint-item" data-status="ok"><div class="maint-ico">🧹</div><div class="maint-body"><div class="maint-name">Roof inspection</div><div class="maint-meta">Annual · Done Feb 2026 · Next Feb 2027</div></div><div class="maint-status ms-ok">On track</div></div>
+    <div class="maint-item" data-status="ok"><div class="maint-ico">❄️</div><div class="maint-body"><div class="maint-name">AC service — all units</div><div class="maint-meta">Annual · Done Mar 2026 · Next Mar 2027</div></div><div class="maint-status ms-ok">On track</div></div>
+    <div class="maint-item" data-status="ok"><div class="maint-ico">🔒</div><div class="maint-body"><div class="maint-name">Door lock & window latch check</div><div class="maint-meta">6 monthly · Done Jan 2026 · Next Jul 2026</div></div><div class="maint-status ms-ok">On track</div></div>
+    <div id="maint-add-form" style="display:none;margin-top:.5rem">
+      <div class="add-form">
+        <div style="font-size:.7rem;font-weight:600;color:var(--tx2)">Add maintenance task</div>
+        <input placeholder="Task name (e.g. Gutter cleaning)">
+        <div class="add-form-row">
+          <select><option>Every week</option><option>Every fortnight</option><option>Every month</option><option>Every 3 months</option><option>Every 6 months</option><option>Every year</option></select>
+          <input type="date" placeholder="Next due date">
+        </div>
+        <div class="add-form-row">
+          <button class="save-btn" onclick="toast('Task added!','var(--gn)');document.getElementById('maint-add-form').style.display='none'">Save</button>
+          <button class="cancel-btn" onclick="document.getElementById('maint-add-form').style.display='none'">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <button class="add-btn" onclick="document.getElementById('maint-add-form').style.display=document.getElementById('maint-add-form').style.display==='none'?'block':'none'">＋ Add maintenance task</button>
+  </div>
+</div>
+
+</div><!-- /device -->
+<script>
+// ── CLOCK ──
+function tick(){const t=new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+  ['tf','tp','tk','tc-t'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=t})}
+tick();setInterval(tick,15000);
+
+// ── STATE ──
+let buf='',mode='family',prevScreen='sf';
+const PINS={'1234':'carl','5678':'kim','1111':'mason','2222':'jaxon','3333':'mason','4444':'mason','2468':'nan','8642':'carer','9090':'visitor'};
+const SCREENS={family:'sf',carl:'spar',kim:'spar',mason:'smas',jaxon:'sjax',nan:'snan',carer:'scar',visitor:'svis'};
+const PERSONAL=['carl','kim','mason','jaxon','nan','carer','visitor'];
+
+// ── PIN ──
+function pk(d){if(!d||buf.length>=4)return;buf+=d;dots();if(buf.length===4)setTimeout(tryPin,180)}
+function pdel(){buf=buf.slice(0,-1);dots();document.getElementById('pd').textContent='Enter your PIN'}
+function dots(){for(let i=1;i<=4;i++)document.getElementById('d'+i).classList.toggle('filled',i<=buf.length)}
+function tryPin(){const m=PINS[buf];if(m){go(m)}else{document.getElementById('pd').textContent='Wrong PIN — try again';buf='';dots()}}
+
+// ── GO (home screens) ──
+function go(m){
+  mode=m;
+  hideAll();
+  buf='';dots();document.getElementById('pd').textContent='Enter your PIN';
+  const sid=SCREENS[m]||'sf';
+  document.getElementById(sid).classList.add('active');
+  if(m==='kim')document.getElementById('pbadge').textContent='👩 Kim · Parent';
+  if(m==='carl')document.getElementById('pbadge').textContent='👔 Carl · Parent';
+  const isP=m==='carl'||m==='kim';
+  ['m-people','m-settings','m-priv'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=isP?'':'none'});
+  const isPersonal=PERSONAL.includes(m);
+  document.querySelectorAll('.lkb').forEach(b=>{b.textContent=isPersonal?'✕':'👤';b.title=isPersonal?'Back to Family View':'Switch user'});
+  document.getElementById('sm-lk-btn').textContent=isPersonal?'✕ Back to Family View':'👤 Switch user';
+}
+function goHome(){go(mode==='family'?'family':mode)}
+
+// ── NAV (page screens) ──
+function navTo(screenId){
+  // Store which home to return to
+  const homeId=document.querySelector('.screen.active').id;
+  prevScreen=homeId;
+  hideAll();
+  document.getElementById(screenId).classList.add('active');
+  // Sync lock buttons on pages
+  const isPersonal=PERSONAL.includes(mode);
+  document.querySelectorAll('.lkb').forEach(b=>{b.textContent=isPersonal?'✕':'👤'});
+  document.getElementById('sm-lk-btn').textContent=isPersonal?'✕ Back to Family View':'👤 Switch user';
+}
+function navBack(){
+  hideAll();
+  document.getElementById(prevScreen).classList.add('active');
+}
+function lockHub(){
+  const isPersonal=PERSONAL.includes(mode);
+  if(isPersonal){go('family');}
+  else{hideAll();document.getElementById('sl').classList.add('active');}
+  closeSM();
+}
+function hideAll(){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'))}
+
+// ── MENU ──
+function openSM(){document.getElementById('sm').classList.add('open');document.getElementById('smo').classList.add('open')}
+function closeSM(){document.getElementById('sm').classList.remove('open');document.getElementById('smo').classList.remove('open')}
+
+// ── CHECKS ──
+function tc(el){const b=el.querySelector('.cb'),t=el.querySelector('.ct');const c=b.classList.toggle('chk');b.textContent=c?'✓':'';t&&t.classList.toggle('done',c)}
+function tc2(el,cat){tc(el)}
+
+// ── GROCERIES ──
+function addGrocItem(){
+  const inp=document.getElementById('groc-inp');const v=inp.value.trim();if(!v)return;
+  const d=document.createElement('div');d.className='groc-item';d.onclick=()=>tc(d);
+  d.innerHTML=`<div class="cb"></div><div class="groc-text">${v}</div>`;
+  document.getElementById('groc-all').prepend(d);inp.value='';toast('Added: '+v,'var(--gn)')
+}
+function filterGroc(cat,btn){
+  document.querySelectorAll('#sgroc .ptab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');
+  document.querySelectorAll('#groc-all .groc-item').forEach(i=>{
+    if(cat==='all')i.style.display='';
+    else i.style.display=(i.dataset.cat===cat)?'':'none';
+  });
+}
+function toggleBasics(){
+  const t=document.getElementById('basics-toggle');
+  const l=document.getElementById('basics-list');
+  t.classList.toggle('open');
+  l.style.display=l.style.display==='none'?'block':'none';
+}
+
+// ── TASKS ──
+const TASKS=[
+  {who:'mason',name:'Dishes',done:true,cat:'Daily',badge:'Done ✓',bc:'var(--gn)'},
+  {who:'mason',name:'Vacuum lounge room',done:false,cat:'Daily',badge:'Today',bc:'var(--am)'},
+  {who:'jaxon',name:'Take bins out 🗑️',done:false,cat:'Weekly',badge:'Tonight!',bc:'var(--rd)'},
+  {who:'jaxon',name:'Feed the dog',done:false,cat:'Daily',badge:'Today',bc:'var(--am)'},
+  {who:'jaxon',name:'Pack soccer bag',done:false,cat:'Today',badge:'5:30 PM',bc:'var(--cu)'},
+  {who:'easton',name:'Tidy dinosaur toys',done:false,cat:'Daily',badge:'Today',bc:'var(--am)'},
+  {who:'hudson',name:'Put toys away',done:false,cat:'Daily',badge:'Today',bc:'var(--am)'},
+  {who:'carl',name:'Soccer pickup — Suncorp',done:false,cat:'Today',badge:'5:30 PM',bc:'var(--cu)'},
+  {who:'carl',name:'Pay electricity bill',done:false,cat:'Urgent',badge:'Overdue!',bc:'var(--rd)'},
+  {who:'kim',name:'Easton therapy — Dr Nguyen',done:true,cat:'Today',badge:'Done ✓',bc:'var(--gn)'},
+  {who:'kim',name:'Book dentist — all kids',done:false,cat:'This week',badge:'Reminder',bc:'var(--bl)'},
+];
+const WHO_COLORS={mason:'var(--bl)',jaxon:'var(--cu)',easton:'var(--pu)',hudson:'var(--gn)',carl:'var(--am)',kim:'var(--rd)'};
+const WHO_INIT={mason:'M',jaxon:'J',easton:'E',hudson:'H',carl:'C',kim:'K'};
+
+function renderTasks(filter){
+  const list=document.getElementById('tasks-list');
+  list.innerHTML='';
+  const items=filter==='all'?TASKS:TASKS.filter(t=>t.who===filter);
+  let btn=document.createElement('button');btn.className='add-btn';btn.textContent='＋ Add task';btn.style.marginBottom='.5rem';
+  list.appendChild(btn);
+  items.forEach(t=>{
+    const div=document.createElement('div');div.className='task-item';
+    div.innerHTML=`<div class="task-cb${t.done?' chk':''}" onclick="this.classList.toggle('chk');this.nextElementSibling.querySelector('.task-name').classList.toggle('done')">${t.done?'✓':''}</div>
+      <div class="task-body"><div class="task-name${t.done?' done':''}">${t.name}</div><div class="task-meta">${t.cat}</div></div>
+      <div class="task-who" style="background:${WHO_COLORS[t.who]}22;color:${WHO_COLORS[t.who]};border:1px solid ${WHO_COLORS[t.who]}44">${WHO_INIT[t.who]}</div>
+      <div class="task-badge" style="border-color:${t.bc}44;color:${t.bc};background:${t.bc}11">${t.badge}</div>`;
+    list.appendChild(div);
+  });
+}
+function filterTasks(f,btn){
+  document.querySelectorAll('#stasks .ptab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');
+  renderTasks(f);
+}
+renderTasks('all');
+
+// ── ALERTS ──
+function alertTab(tab,btn){
+  document.querySelectorAll('#salerts .ptab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');
+  document.getElementById('alert-active').style.display=tab==='active'?'':'none';
+  document.getElementById('alert-history').style.display=tab==='history'?'':'none';
+  document.getElementById('alert-send').style.display=tab==='send'?'':'none';
+  // Show send tab only if parent
+  const isP=mode==='carl'||mode==='kim';
+  document.getElementById('send-tab-btn').style.display=isP?'':'none';
+}
+// Hide send tab for non-parents by default
+window.addEventListener('load',()=>{
+  const isP=mode==='carl'||mode==='kim';
+  document.getElementById('send-tab-btn').style.display=isP?'':'none';
+});
+function sendAlert(type){
+  const ids={nudge:'nudge-msg',knock:'knock-msg',blast:'blast-msg2'};
+  const inp=document.getElementById(ids[type]);
+  const msg=(inp&&inp.value.trim())||'Please pay attention to this alert.';
+  if(type==='blast'){showBlast(msg);}
+  else{toast(type==='nudge'?'💬 Nudge sent!':'🔔 Knock sent!',type==='nudge'?'var(--am)':'var(--cu)');if(inp)inp.value='';}
+}
+
+// ── BILLS ──
+function billsTab(cat,btn){
+  document.querySelectorAll('#sbills .ptab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');
+  document.querySelectorAll('#bills-list .bill-row').forEach(r=>{
+    r.style.display=(cat==='all'||r.dataset.cat===cat)?'':'none';
+  });
+  document.querySelectorAll('#bills-list .slbl').forEach(l=>{
+    l.style.display=(cat==='all')?'':'none';
+  });
+}
+
+// ── MAINTENANCE ──
+function maintTab(cat,btn){
+  document.querySelectorAll('#smaint .ptab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');
+  document.querySelectorAll('.maint-item').forEach(r=>{
+    r.style.display=(cat==='all'||r.dataset.status===cat)?'':'none';
+  });
+  document.querySelectorAll('#smaint .slbl').forEach(l=>{
+    l.style.display=(cat==='all')?'':'none';
+  });
+}
+
+// ── BLASTS ──
+function sndNudge(){toast('💬 Nudge sent to Hub!','var(--am)')}
+function sndKnock(){toast('🔔 Knock sent to Hub!','var(--cu)')}
+function showBlast(msg){
+  const m=msg||(document.getElementById('bmsg')&&document.getElementById('bmsg').value)||'ATTENTION — CHECK THE HUB!';
+  document.getElementById('btxt').textContent=m.toUpperCase();
+  document.getElementById('bfrom').textContent='From: '+(mode==='carl'?'Carl':'Kim')+' · '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('bov').classList.add('active');
+}
+function fireBlast(){showBlast()}
+function acceptBlast(){document.getElementById('bov').classList.remove('active');toast('✓ Blast accepted and logged','var(--gn)')}
+
+// ── CALENDAR ──
+let calYear=2026,calMonth=4; // 0-indexed, 4=May
+const CAL_EVENTS={
+  '2026-5-1':[{t:'8:30 AM',title:'School — normal day',sub:'All kids',col:'var(--bl)',vis:'Household'}],
+  '2026-5-1':[{t:'8:30 AM',title:'School',sub:'All kids',col:'var(--bl)',vis:'Household'},{t:'5:30 PM',title:'Jaxon soccer training',sub:'Suncorp Fields · Dad driving',col:'var(--cu)',vis:'Household'}],
+  '2026-4-30':[{t:'8:30 AM',title:'School',sub:'All kids',col:'var(--bl)',vis:'Household'},{t:'12:30 PM',title:'Easton therapy — Dr Nguyen',sub:'Kim attending',col:'var(--pu)',vis:'Parents only'},{t:'5:30 PM',title:'Jaxon soccer training',sub:'Dad driving',col:'var(--cu)',vis:'Household'},{t:'7:00 PM',title:'Family dinner',sub:'Pasta bake',col:'var(--gn)',vis:'Household'}],
+  '2026-5-1':[{t:'All day',title:'🎂 Mason\'s birthday — turning 14!',sub:'',col:'var(--gn)',vis:'Household'},{t:'9:00 AM',title:'School sports day',sub:'All kids',col:'var(--bl)',vis:'Household'}],
+  '2026-5-2':[{t:'All day',title:'🎂 Mason\'s birthday — turning 14!',sub:'',col:'var(--gn)',vis:'Household'},{t:'',title:'School sports day',sub:'All kids',col:'var(--bl)',vis:'Household'}],
+  '2026-5-3':[{t:'10:00 AM',title:'Nan visiting 🤗',sub:'Arrives 10 AM · staying for lunch',col:'var(--cu)',vis:'Household'}],
+  '2026-5-7':[{t:'Before dark',title:'Recycle bins 🗑️',sub:'',col:'var(--am)',vis:'Household'}],
+  '2026-5-15':[{t:'',title:'Car rego due — CX-5',sub:'',col:'var(--rd)',vis:'Parents only'},{t:'',title:'Council rates Q2 due',sub:'$680',col:'var(--am)',vis:'Parents only'}],
+  '2026-5-10':[{t:'10:00 AM',title:'Jaxon soccer — away game',sub:'Transport required',col:'var(--cu)',vis:'Household'}],
+  '2026-5-20':[{t:'6:30 PM',title:'School production rehearsal',sub:'Mason + Jaxon',col:'var(--bl)',vis:'Household'}],
+  '2026-5-25':[{t:'All day',title:'School excursion — Science',sub:'Easton · permission slip needed',col:'var(--bl)',vis:'Household'}],
+};
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function calRender(){
+  document.getElementById('cal-month').textContent=MONTHS[calMonth]+' '+calYear;
+  const grid=document.getElementById('cal-grid');grid.innerHTML='';
+  const first=new Date(calYear,calMonth,1).getDay(); // 0=Sun
+  const offset=(first===0?6:first-1); // Mon start
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  for(let i=0;i<offset;i++){
+    const d=document.createElement('div');d.className='cal-day other-month';
+    const prev=new Date(calYear,calMonth,1-offset+i);
+    d.innerHTML=`<div class="cal-num">${prev.getDate()}</div>`;grid.appendChild(d);
+  }
+  for(let day=1;day<=days;day++){
+    const d=document.createElement('div');d.className='cal-day';
+    const isToday=day===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+    if(isToday)d.classList.add('today');
+    const key=`${calYear}-${calMonth+1}-${day}`;
+    const evs=CAL_EVENTS[key]||[];
+    const dots=evs.slice(0,3).map(e=>`<div class="cal-dot" style="background:${e.col}"></div>`).join('');
+    d.innerHTML=`<div class="cal-num">${day}</div><div class="cal-dots">${dots}</div>`;
+    d.onclick=()=>calShowDay(calYear,calMonth+1,day,evs,d);
+    grid.appendChild(d);
+  }
+  // Show today's events by default
+  const todayKey=`${calYear}-${calMonth+1}-${today.getDate()}`;
+  const todayEvs=CAL_EVENTS[todayKey]||[];
+  const todayEl=grid.children[offset+today.getDate()-1];
+  if(todayEl)calShowDay(calYear,calMonth+1,today.getDate(),todayEvs,todayEl);
+}
+function calShowDay(y,m,d,evs,el){
+  document.querySelectorAll('.cal-day').forEach(c=>c.classList.remove('selected'));
+  if(el)el.classList.add('selected');
+  const area=document.getElementById('cal-events');
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  area.innerHTML=`<div class="cal-ev-header">${d} ${months[m-1]} ${y}${evs.length?` — ${evs.length} event${evs.length>1?'s':''}`:'— No events'}</div>`;
+  evs.forEach(ev=>{
+    const show=mode==='carl'||mode==='kim'||(ev.vis==='Household');
+    if(!show)return;
+    const div=document.createElement('div');div.className='cal-ev';
+    div.innerHTML=`<div class="cal-ev-bar" style="background:${ev.col}"></div><div class="cal-ev-time">${ev.t||'All day'}</div><div class="cal-ev-body"><div class="cal-ev-title">${ev.title}</div>${ev.sub?`<div class="cal-ev-sub">${ev.sub}</div>`:''}</div>${ev.vis!=='Household'?`<div class="cal-ev-vis">🔒 ${ev.vis}</div>`:''}`;
+    area.appendChild(div);
+  });
+  if(mode==='carl'||mode==='kim'){
+    const addBtn=document.createElement('button');addBtn.className='add-btn';addBtn.style.padding='.4rem 0';addBtn.textContent='＋ Add event on this day';
+    area.appendChild(addBtn);
+  }
+}
+function calPrev(){if(calMonth===0){calMonth=11;calYear--;}else calMonth--;calRender()}
+function calNext(){if(calMonth===11){calMonth=0;calYear++;}else calMonth++;calRender()}
+calRender();
+
+// ── TOAST ──
+function toast(msg,color){const t=document.createElement('div');t.style.cssText=`position:absolute;bottom:48px;left:50%;transform:translateX(-50%);background:rgba(26,31,58,.96);border:1px solid ${color};color:var(--tx);padding:.5rem 1.1rem;border-radius:999px;font-size:.73rem;z-index:300;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5)`;t.textContent=msg;document.getElementById('app').appendChild(t);setTimeout(()=>t.remove(),2500)}
+
+// ── INIT ──
+// Hide parent-only menu items from non-parents by default
+['m-people','m-settings','m-priv'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none'});
+document.getElementById('send-tab-btn').style.display='none';
+</script>
+</body>
+</html>
