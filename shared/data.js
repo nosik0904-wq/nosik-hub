@@ -214,6 +214,31 @@
       "BINS NEED TO GO OUT NOW",
       "CALL KIM URGENTLY",
       "COME HOME NOW"
-    ]
+    ],
+
+    // App settings — persisted per device
+    appSettings: {
+      firstLaunch: true,
+      viewMode:    "auto",   // "auto" | "mobile" | "hub"
+      dataMode:    "empty",  // "empty" | "real" | "sample"
+      animation:   "low",
+      homeDisplay: {
+        today:     "row",
+        alerts:    "row",
+        groceries: "row",
+        chores:    "row",
+        next7:     "row",
+        inbox:     "hideUnlessActive",
+        bills:     "hideUnlessActive",
+        school:    "hideUnlessActive",
+        sport:     "hideUnlessActive"
+      }
+    },
+
+    // Quick-capture inbox — unprocessed items from mobile Quick Capture
+    capturedItems: [],
+
+    // Action log — last 100 actions for debugging
+    actionLog: []
   };
 })();

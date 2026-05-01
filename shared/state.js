@@ -28,10 +28,13 @@
     const seed = cloneData(window.NOSIK_DATA);
     const saved = localStorage.getItem(STORE_KEY);
     window.STATE = saved ? mergeSavedState(seed, JSON.parse(saved)) : seed;
-    window.STATE.currentUser = window.STATE.currentUser || null;
-    window.STATE.blastActive = window.STATE.blastActive || false;
-    window.STATE.bills = window.STATE.bills || seed.bills || [];
-    window.STATE.appointments = window.STATE.appointments || seed.appointments || [];
+    window.STATE.currentUser    = window.STATE.currentUser    || null;
+    window.STATE.blastActive    = window.STATE.blastActive    || false;
+    window.STATE.bills          = window.STATE.bills          || seed.bills          || [];
+    window.STATE.appointments   = window.STATE.appointments   || seed.appointments   || [];
+    window.STATE.capturedItems  = window.STATE.capturedItems  || seed.capturedItems  || [];
+    window.STATE.actionLog      = window.STATE.actionLog      || seed.actionLog      || [];
+    window.STATE.appSettings    = window.STATE.appSettings    || seed.appSettings    || { firstLaunch: true, viewMode: "auto", dataMode: "empty" };
     window.STATE.lastError = null;
     if (!window.__NOSIK_STORAGE_BOUND) {
       window.__NOSIK_STORAGE_BOUND = true;
@@ -116,5 +119,113 @@
       visitor: ["household", "hub_public"]
     };
     return (visibilityArray || ["household"]).some(value => (map[role] || []).includes(value));
+  };
+
+  // ── MOBILE / VIEW MODE ──────────────────────────────────────
+  window.isMobileView = function isMobileView() {
+    const mode = window.STATE?.appSettings?.viewMode || "auto";
+    if (mode === "mobile") return true;
+    if (mode === "hub")    return false;
+    return window.innerWidth < 768;
+  };
+
+  window.setViewMode = function setViewMode(mode) {
+    if (!window.STATE.appSettings) window.STATE.appSettings = {};
+    window.STATE.appSettings.viewMode = mode;
+    window.logAction("changed-view-mode", mode);
+    saveState();
+  };
+
+  // ── ACTION LOG ───────────────────────────────────────────────
+  window.logAction = function logAction(type, detail) {
+    if (!window.STATE.actionLog) window.STATE.actionLog = [];
+    const now = new Date();
+    window.STATE.actionLog.unshift({
+      type,
+      detail: detail || "",
+      time:  now.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", hour12: true }),
+      date:  now.toLocaleDateString("en-AU", { day: "numeric", month: "short" })
+    });
+    if (window.STATE.actionLog.length > 100) {
+      window.STATE.actionLog = window.STATE.actionLog.slice(0, 100);
+    }
+    saveState();
+  };
+
+  // ── DATA OPERATIONS ─────────────────────────────────────────
+  window.startFresh = function startFresh() {
+    if (!window.STATE.appSettings) window.STATE.appSettings = {};
+    window.STATE.appSettings.firstLaunch = false;
+    window.STATE.appSettings.dataMode    = "real";
+    window.STATE.groceries     = [];
+    window.STATE.dailyItems    = [];
+    window.STATE.calendarItems = [];
+    window.STATE.alerts        = [];
+    window.STATE.nightBefore   = [];
+    window.STATE.capturedItems = [];
+    window.STATE.currentUser   = null;
+    window.logAction("start-fresh", "Started with empty real household");
+    saveState();
+  };
+
+  window.loadSampleData = function loadSampleData() {
+    const seed = cloneData(window.NOSIK_DATA);
+    window.STATE.groceries     = seed.groceries;
+    window.STATE.dailyItems    = seed.dailyItems;
+    window.STATE.calendarItems = seed.calendarItems;
+    window.STATE.alerts        = seed.alerts;
+    window.STATE.nightBefore   = seed.nightBefore;
+    window.STATE.bills         = seed.bills;
+    window.STATE.appointments  = seed.appointments;
+    window.STATE.mealPlan      = seed.mealPlan;
+    window.STATE.meals         = seed.meals;
+    window.STATE.eastonCare    = seed.eastonCare;
+    window.STATE.visitorInfo   = seed.visitorInfo;
+    window.STATE.capturedItems = [];
+    if (!window.STATE.appSettings) window.STATE.appSettings = {};
+    window.STATE.appSettings.firstLaunch = false;
+    window.STATE.appSettings.dataMode    = "sample";
+    window.STATE.currentUser = null;
+    window.logAction("load-sample", "Sample household data loaded");
+    saveState();
+  };
+
+  window.exportBackup = function exportBackup() {
+    const payload = {
+      exportedAt:    new Date().toISOString(),
+      version:       "nosik-phase1-2",
+      household:     window.STATE.household,
+      members:       window.STATE.users,
+      groceries:     window.STATE.groceries,
+      dailyItems:    window.STATE.dailyItems,
+      calendarItems: window.STATE.calendarItems,
+      alerts:        window.STATE.alerts,
+      capturedItems: window.STATE.capturedItems,
+      appSettings:   window.STATE.appSettings,
+      actionLog:     window.STATE.actionLog
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `nosik-backup-${todayISO()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    window.logAction("exported-backup", "JSON backup downloaded");
+  };
+
+  window.resetApp = function resetApp() {
+    localStorage.removeItem("nosik-v3-state");
+    const seed = cloneData(window.NOSIK_DATA);
+    Object.assign(window.STATE, seed);
+    window.STATE.currentUser    = null;
+    window.STATE.lastError      = null;
+    window.STATE.blastActive    = false;
+    window.STATE.capturedItems  = [];
+    window.STATE.actionLog      = [];
+    window.STATE.appSettings    = { firstLaunch: true, viewMode: "auto", dataMode: "empty", animation: "low" };
+    saveState();
   };
 })();

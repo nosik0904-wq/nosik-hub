@@ -1,9 +1,19 @@
 {
-  "name": "NOSIK Hub",
+  "name": "NOSIK",
   "short_name": "NOSIK",
-  "start_url": "./index.html",
+  "description": "Organise life. Save time. Keep improving.",
+  "start_url": "/hub/",
+  "scope": "/hub/",
   "display": "standalone",
-  "background_color": "#111827",
-  "theme_color": "#2563eb",
-  "icons": []
+  "orientation": "any",
+  "background_color": "#1a1f3a",
+  "theme_color": "#1a1f3a",
+  "icons": [
+    {
+      "src": "/public/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ]
 }

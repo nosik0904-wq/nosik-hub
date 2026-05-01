@@ -10,6 +10,8 @@
   let pinOpen = false;
   let publicPanel = "home";
   let navPinned = false;
+  let mobileSection = null;   // null = mobile home, string = open section
+  let mobileAlertLevel = "nudge";
   let stopSync = null;
   const PARENT_HUD_WIDTH = 1376;
 
@@ -32,8 +34,32 @@
   };
 
   function render() {
-    const isParentHud = !STATE.currentUser || STATE.currentUser?.role === "parent";
+    applyAnimation();
+
+    // ── Welcome screen (first launch) ──────────────────────────
+    if (STATE.appSettings?.firstLaunch !== false) {
+      app.innerHTML = welcomeScreen();
+      bindWelcome();
+      return;
+    }
+
+    // ── Mobile: section view ────────────────────────────────────
+    if (isMobileView() && mobileSection) {
+      app.innerHTML = mobileSectionViewHTML();
+      bindMobileSection();
+      return;
+    }
+
+    // ── Mobile: home (parent or no user) ───────────────────────
+    if (isMobileView() && (!STATE.currentUser || STATE.currentUser?.role === "parent")) {
+      app.innerHTML = mobileHomeHTML();
+      bindMobileHome();
+      return;
+    }
+
+    // ── Hub / tablet / role views ───────────────────────────────
     syncParentHudScale();
+    const isParentHud = !STATE.currentUser || STATE.currentUser?.role === "parent";
     const mainContent = isParentHud ? `<div class="parent-canvas">${parentHome()}</div>` : roleHome();
     app.innerHTML = `
       <div class="hub-shell${isParentHud ? " is-parent-shell" : ""}">
@@ -76,18 +102,29 @@
   }
 
   function ensureParentHudDemo() {
-    const version = "parent-hud-v5";
+    const version = "parent-hud-v6";
     if (STATE.parentHudVersion === version) return;
+    const hadPriorState = !!STATE.parentHudVersion;
     const seed = cloneData(window.NOSIK_DATA);
-    ["dailyItems", "groceries", "bills", "appointments", "meals", "calendarItems", "vaultItems", "tidySuggestions", "accessLog"].forEach((key) => {
-      STATE[key] = seed[key] || [];
+    ["dailyItems", "groceries", "bills", "appointments", "meals", "calendarItems", "vaultItems", "tidySuggestions"].forEach((key) => {
+      STATE[key] = STATE[key]?.length ? STATE[key] : (seed[key] || []);
     });
-    STATE.mealPlan       = { ...seed.mealPlan, ...(STATE.customMealPlan || {}) };
-    STATE.eastonCare     = seed.eastonCare;
-    STATE.visitorInfo    = seed.visitorInfo;
-    STATE.settings       = seed.settings || { animation: "low" };
+    STATE.mealPlan       = STATE.mealPlan && Object.keys(STATE.mealPlan).length ? STATE.mealPlan : seed.mealPlan;
+    STATE.eastonCare     = STATE.eastonCare  || seed.eastonCare;
+    STATE.visitorInfo    = STATE.visitorInfo || seed.visitorInfo;
+    STATE.settings       = STATE.settings    || seed.settings || { animation: "low" };
+    STATE.capturedItems  = STATE.capturedItems || [];
+    STATE.actionLog      = STATE.actionLog     || [];
     STATE.assistVisible  = null;
     STATE.features       = { ...seed.features, ...(STATE.features || {}) };
+    // Returning users from Phase 1.2 already have data — skip welcome
+    if (hadPriorState) {
+      STATE.appSettings = STATE.appSettings || {};
+      STATE.appSettings.firstLaunch = false;
+      STATE.appSettings.dataMode    = STATE.appSettings.dataMode || "sample";
+    } else {
+      STATE.appSettings = STATE.appSettings || seed.appSettings || { firstLaunch: true, viewMode: "auto", dataMode: "empty" };
+    }
     STATE.parentHudVersion = version;
     saveState();
   }
@@ -1824,8 +1861,700 @@
     parentMsgRotate = null;
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // WELCOME SCREEN
+  // ═══════════════════════════════════════════════════════════
+
+  function welcomeScreen() {
+    return `
+      <div class="welcome-screen">
+        <div class="welcome-inner">
+          <div class="welcome-logo">
+            <h1>NOSIK</h1>
+            <p>Organise life. Save time. Keep improving.</p>
+          </div>
+          <div class="welcome-body">
+            <p class="welcome-lead">NOSIK is ready.</p>
+            <p class="welcome-sub">Start fresh with your real household, customise first, or load a sample household to see how it works.</p>
+          </div>
+          <div class="welcome-actions">
+            <button class="welcome-btn welcome-btn--primary" data-action="start-fresh">
+              Start Fresh
+            </button>
+            <button class="welcome-btn welcome-btn--secondary" data-action="customise-first">
+              Customise First
+            </button>
+            <button class="welcome-btn welcome-btn--ghost" data-action="load-sample">
+              Load Sample Household
+            </button>
+          </div>
+          <p class="welcome-note">You can customise everything later. NOSIK will suggest helpful features as you use it.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function bindWelcome() {
+    app.querySelector("[data-action='start-fresh']")?.addEventListener("click", () => {
+      startFresh();
+      render();
+    });
+    app.querySelector("[data-action='customise-first']")?.addEventListener("click", () => {
+      startFresh();
+      publicPanel = "menu";
+      render();
+    });
+    app.querySelector("[data-action='load-sample']")?.addEventListener("click", () => {
+      if (confirm("Load sample household data? This gives you a filled demo to explore.")) {
+        loadSampleData();
+        render();
+      }
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // MOBILE HOME
+  // ═══════════════════════════════════════════════════════════
+
+  function mobileHomeHTML() {
+    return `
+      <div class="mobile-app">
+        ${mobileHeader()}
+        <main class="mobile-main" id="mobile-main">
+          ${mobileTodayFocus()}
+          ${mobileQuickCapture()}
+          ${mobileSectionList()}
+        </main>
+        ${mobileBottomNav()}
+        ${blastOverlay()}
+        ${pinOpen ? pinSheet() : ""}
+      </div>
+    `;
+  }
+
+  function mobileHeader() {
+    const now = new Date();
+    const day = now.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+    return `
+      <header class="mobile-header">
+        <span class="mobile-brand">NOSIK</span>
+        <span class="mobile-date">${day}</span>
+        <button class="mobile-menu-btn" data-action="open-pin" aria-label="Sign in">
+          ${icon("user")}
+        </button>
+      </header>
+    `;
+  }
+
+  function mobileTodayFocus() {
+    const parts = buildMobileFocusParts();
+    const text = parts.length ? parts.join(" · ") : "Nothing urgent yet. Add your first reminder, grocery item, or event.";
+    return `
+      <div class="mobile-focus">
+        <div class="mobile-focus-lbl">TODAY'S FOCUS</div>
+        <div class="mobile-focus-txt">${safe(text)}</div>
+      </div>
+    `;
+  }
+
+  function buildMobileFocusParts() {
+    const parts = [];
+    const today = todayISO();
+    const activeAlerts = unacceptedAlerts().filter(a => a.level !== "blast");
+    const urgentGrocs  = (STATE.groceries || []).filter(g => g.urgent && !g.done);
+    const todayItems   = (STATE.dailyItems || []).filter(i => i.date === today && !i.done && i.is_non_negotiable);
+
+    if (activeAlerts.length) parts.push(`${activeAlerts.length} alert${activeAlerts.length > 1 ? "s" : ""}`);
+    if (urgentGrocs.length)  parts.push(urgentGrocs.map(g => g.name).join(", ") + " needed");
+    todayItems.slice(0, 2).forEach(i => parts.push(i.title));
+    const dinner = tonightMeal();
+    if (dinner) parts.push(`Dinner: ${dinner}`);
+    return parts;
+  }
+
+  function mobileQuickCapture() {
+    const inbox = (STATE.capturedItems || []).slice(0, 3);
+    return `
+      <div class="mobile-capture">
+        <div class="mobile-capture-bar">
+          <input
+            id="quick-capture-input"
+            class="mobile-capture-input"
+            type="text"
+            placeholder="Tell NOSIK something..."
+            autocomplete="off"
+            inputmode="text"
+          >
+          <button class="mobile-capture-btn" data-action="submit-capture" aria-label="Add">
+            ${icon("plus")}
+          </button>
+        </div>
+        ${inbox.length ? `
+          <div class="mobile-inbox-preview">
+            ${inbox.map(item => `
+              <div class="inbox-preview-item">
+                <span class="inbox-tag inbox-tag--${item.type}">${item.type}</span>
+                <span>${safe(item.text)}</span>
+              </div>
+            `).join("")}
+          </div>
+        ` : ""}
+      </div>
+    `;
+  }
+
+  function mobileSectionList() {
+    const today = todayISO();
+    const sections = [
+      {
+        id: "today", icon: "check", label: "Today",
+        count: (STATE.dailyItems || []).filter(i => i.date === today && !i.done).length,
+        display: STATE.appSettings?.homeDisplay?.today || "row"
+      },
+      {
+        id: "alerts", icon: "bell", label: "Alerts",
+        count: unacceptedAlerts().length,
+        urgent: unacceptedAlerts().length > 0,
+        display: STATE.appSettings?.homeDisplay?.alerts || "row"
+      },
+      {
+        id: "groceries", icon: "shopping", label: "Groceries",
+        count: (STATE.groceries || []).filter(g => !g.done).length,
+        display: STATE.appSettings?.homeDisplay?.groceries || "row"
+      },
+      {
+        id: "chores", icon: "list", label: "Chores",
+        count: (STATE.dailyItems || []).filter(i => i.date === today && !i.done && i.category !== "reminder").length,
+        display: STATE.appSettings?.homeDisplay?.chores || "row"
+      },
+      {
+        id: "next7", icon: "calendar", label: "Next 7 Days",
+        count: (() => { let n = 0; for (let i = 1; i <= 7; i++) { const d = new Date(); d.setDate(d.getDate() + i); const k = d.toISOString().split("T")[0]; n += (STATE.calendarItems || []).filter(c => c.starts_at?.startsWith(k)).length; } return n; })(),
+        display: STATE.appSettings?.homeDisplay?.next7 || "row"
+      },
+      {
+        id: "inbox", icon: "home", label: "Inbox",
+        count: (STATE.capturedItems || []).length,
+        display: (STATE.capturedItems || []).length ? "row" : (STATE.appSettings?.homeDisplay?.inbox || "hideUnlessActive")
+      }
+    ].filter(s => {
+      if (s.display === "hide") return false;
+      if (s.display === "hideUnlessActive") return s.count > 0;
+      return true;
+    });
+
+    return `
+      <div class="mobile-sections">
+        <div class="mobile-sections-lbl">SECTIONS</div>
+        ${sections.map(s => `
+          <button class="section-row${s.urgent ? " section-row--urgent" : ""}${s.count === 0 ? " section-row--empty" : ""}"
+                  data-section="${s.id}" aria-label="${s.label}">
+            <span class="section-row-icon">${icon(s.icon)}</span>
+            <span class="section-row-name">${s.label}</span>
+            <span class="section-row-count">${s.count === 0 ? "Empty" : `${s.count} item${s.count === 1 ? "" : "s"}`}</span>
+            ${s.urgent ? `<span class="section-badge section-badge--urgent">Active</span>` : ""}
+            <span class="section-row-chevron">${icon("chevron")}</span>
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function mobileBottomNav(active) {
+    const cur = active || "today";
+    return `
+      <nav class="mobile-bottom-nav">
+        ${[["today","Today","home"],["calendar","Calendar","calendar"],["lists","Lists","list"],["family","Family","user"],["more","More","settings"]].map(([id, label, ic]) => `
+          <button class="bottom-nav-btn${cur === id ? " is-active" : ""}" data-nav="${id}" aria-label="${label}">
+            ${icon(ic)}<span>${label}</span>
+          </button>
+        `).join("")}
+      </nav>
+    `;
+  }
+
+  function bindMobileHome() {
+    // Quick capture
+    const captureInput = app.querySelector("#quick-capture-input");
+    captureInput?.addEventListener("keydown", e => { if (e.key === "Enter") doQuickCapture(); });
+    app.querySelector("[data-action='submit-capture']")?.addEventListener("click", doQuickCapture);
+
+    // Section rows
+    app.querySelectorAll("[data-section]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        mobileSection = btn.dataset.section;
+        logAction("opened-section", btn.dataset.section);
+        render();
+      });
+    });
+
+    // Bottom nav
+    app.querySelectorAll("[data-nav]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const nav = btn.dataset.nav;
+        if (nav === "more")     { mobileSection = "debug";    render(); }
+        else if (nav === "lists")    { mobileSection = "groceries"; render(); }
+        else if (nav === "calendar") { mobileSection = "next7";     render(); }
+        else if (nav === "family")   { openPin(); }
+        else { mobileSection = null; render(); }
+      });
+    });
+
+    // PIN / blast
+    app.querySelectorAll("[data-action='open-pin']").forEach(b => b.addEventListener("click", openPin));
+    app.querySelectorAll("[data-pin]").forEach(b => b.addEventListener("click", () => pinPress(b.dataset.pin)));
+    app.querySelector("[data-action='login']")?.addEventListener("click", submitPin);
+    app.querySelector("[data-action='close-pin']")?.addEventListener("click", closePin);
+    app.querySelector("[data-action='accept-blast']")?.addEventListener("click", e => acceptBlast(e.target.dataset.id));
+    app.querySelectorAll("[data-action='accept-alert']").forEach(b => b.addEventListener("click", () => acceptAlert(b.dataset.id)));
+  }
+
+  async function doQuickCapture() {
+    const input = app.querySelector("#quick-capture-input");
+    const text  = input?.value.trim();
+    if (!text) return;
+    input.value = "";
+
+    const lower = text.toLowerCase();
+    const isGrocery = /^(add|get|buy)\s/i.test(text)
+      || /\b(milk|bread|eggs|butter|cheese|coffee|juice|meat|chicken|beef|pasta|rice|soap|shampoo|nappies|fruit|veg)\b/.test(lower);
+    const isAlert   = /\b(bins|washing|nudge|knock|blast|remind)\b/.test(lower);
+    const hasTime   = /\b(tonight|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|\d+(am|pm))\b/.test(lower);
+
+    if (isGrocery) {
+      const name = text.replace(/^(add|get|buy)\s+/i, "");
+      const { data } = await db_addGrocery(name);
+      if (data && !STATE.groceries.find(g => g.id === data.id)) STATE.groceries.push(data);
+      logAction("added-grocery", name);
+    } else {
+      const type = isAlert ? "reminder" : hasTime ? "calendar" : "inbox";
+      if (!STATE.capturedItems) STATE.capturedItems = [];
+      STATE.capturedItems.unshift({ id: uid("cap"), text, type, createdAt: new Date().toISOString() });
+      logAction("captured-item", `${type}: ${text}`);
+      saveState();
+    }
+    checkAssistTriggers(text);
+    render();
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // MOBILE SECTION VIEWS
+  // ═══════════════════════════════════════════════════════════
+
+  function mobileSectionViewHTML() {
+    const titles = { today:"Today", alerts:"Alerts", groceries:"Groceries", chores:"Chores", next7:"Next 7 Days", inbox:"Inbox", debug:"Debug / Testing" };
+    return `
+      <div class="mobile-app mobile-section-open">
+        <header class="mobile-section-header">
+          <button class="section-back-btn" data-action="section-back" aria-label="Back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <h2 class="section-title">${safe(titles[mobileSection] || mobileSection)}</h2>
+        </header>
+        <div class="mobile-section-body">
+          ${renderSectionBody(mobileSection)}
+        </div>
+        ${mobileBottomNav(mobileSection)}
+        ${blastOverlay()}
+        ${pinOpen ? pinSheet() : ""}
+      </div>
+    `;
+  }
+
+  function renderSectionBody(id) {
+    if (id === "groceries") return sectionGroceries();
+    if (id === "chores")    return sectionChores();
+    if (id === "today")     return sectionToday();
+    if (id === "alerts")    return sectionAlerts();
+    if (id === "next7")     return sectionNext7();
+    if (id === "inbox")     return sectionInbox();
+    if (id === "debug")     return sectionDebug();
+    return `<div class="section-empty-state"><p>Coming soon.</p></div>`;
+  }
+
+  function sectionGroceries() {
+    const items     = (STATE.groceries || []).filter(g => !g.done);
+    const doneCount = (STATE.groceries || []).filter(g => g.done).length;
+    return `
+      <div class="section-add-row">
+        <input id="grocery-input" class="section-input" autocomplete="off" placeholder="Add item..." inputmode="text">
+        <button class="section-add-btn" data-section-action="add-grocery">${icon("plus")}</button>
+      </div>
+      ${items.length === 0 && doneCount === 0 ? `
+        <div class="section-empty-state">
+          <p>No groceries yet. Add an item above or use Quick Capture on the home screen.</p>
+        </div>
+      ` : ""}
+      <div class="section-list">
+        ${items.map(item => `
+          <div class="section-item${item.urgent ? " section-item--urgent" : ""}" data-id="${item.id}">
+            <button class="section-tick" data-tick="grocery" data-id="${item.id}" aria-label="Got it"></button>
+            <span class="section-item-text">${safe(item.name)}</span>
+            ${item.stock_level ? `<span class="section-item-meta">${safe(item.stock_level)}</span>` : ""}
+          </div>
+        `).join("")}
+      </div>
+      ${doneCount > 0 ? `<div class="section-done-count">${doneCount} got ✓</div>` : ""}
+    `;
+  }
+
+  function sectionChores() {
+    const today    = todayISO();
+    const items    = (STATE.dailyItems || []).filter(i => i.date === today);
+    const nonNeg   = items.filter(i => i.is_non_negotiable);
+    const cleaning = items.filter(i => !i.is_non_negotiable && i.category === "cleaning");
+    const reminders= items.filter(i => i.category === "reminder");
+    const other    = items.filter(i => !i.is_non_negotiable && i.category !== "cleaning" && i.category !== "reminder");
+    const groups   = [["Non-negotiable", nonNeg], ["Cleaning", cleaning], ["Reminders", reminders], ["Other jobs", other]].filter(([, arr]) => arr.length);
+    return `
+      <div class="section-add-row">
+        <input id="chore-input" class="section-input" autocomplete="off" placeholder="Add chore..." inputmode="text">
+        <button class="section-add-btn" data-section-action="add-chore">${icon("plus")}</button>
+      </div>
+      ${items.length === 0 ? `
+        <div class="section-empty-state">
+          <p>No chores yet. Add a job like "bins out tonight" or "vacuum downstairs".</p>
+        </div>
+      ` : ""}
+      ${groups.map(([label, arr]) => `
+        <div class="section-group-label">${label}</div>
+        <div class="section-list">
+          ${arr.map(item => {
+            const assignee = item.assigned_to ? getPerson(item.assigned_to) : null;
+            return `
+              <div class="section-item${item.done ? " section-item--done" : ""}" data-id="${item.id}">
+                <button class="section-tick${item.done ? " is-done" : ""}" data-tick="daily" data-id="${item.id}">${item.done ? icon("check") : ""}</button>
+                <span class="section-item-text">${safe(item.title)}</span>
+                ${assignee ? `<span class="section-avatar av-${assignee.id}">${assignee.avatar}</span>` : ""}
+              </div>`;
+          }).join("")}
+        </div>
+      `).join("")}
+    `;
+  }
+
+  function sectionToday() {
+    const today    = todayISO();
+    const items    = (STATE.dailyItems || []).filter(i => i.date === today);
+    const calItems = publicCalendarItems().filter(i => i.starts_at?.startsWith(today));
+    return `
+      <div class="section-add-row">
+        <input id="today-input" class="section-input" autocomplete="off" placeholder="Add reminder..." inputmode="text">
+        <button class="section-add-btn" data-section-action="add-today">${icon("plus")}</button>
+      </div>
+      ${calItems.length ? `
+        <div class="section-group-label">Events</div>
+        <div class="section-list">
+          ${calItems.map(item => `
+            <div class="section-item section-item--event">
+              <span class="section-event-time">${eventTime(item.starts_at)}</span>
+              <span class="section-item-text">${safe(item.title)}</span>
+            </div>
+          `).join("")}
+        </div>
+      ` : ""}
+      ${items.length ? `
+        <div class="section-group-label">Today's jobs</div>
+        <div class="section-list">
+          ${items.map(item => {
+            const assignee = item.assigned_to ? getPerson(item.assigned_to) : null;
+            return `
+              <div class="section-item${item.done ? " section-item--done" : ""}" data-id="${item.id}">
+                <button class="section-tick${item.done ? " is-done" : ""}" data-tick="daily" data-id="${item.id}">${item.done ? icon("check") : ""}</button>
+                <span class="section-item-text">${safe(item.title)}</span>
+                ${assignee ? `<span class="section-avatar av-${assignee.id}">${assignee.avatar}</span>` : ""}
+              </div>`;
+          }).join("")}
+        </div>
+      ` : (calItems.length === 0 ? `
+        <div class="section-empty-state">
+          <p>Nothing for today yet. Add events, sport, school, reminders, or bills.</p>
+        </div>
+      ` : "")}
+    `;
+  }
+
+  function sectionAlerts() {
+    const alerts = (STATE.alerts || []).slice(0, 15);
+    return `
+      <div class="alerts-level-row">
+        ${["blast","knock","nudge"].map(lvl => `
+          <button class="alert-lvl-btn alert-lvl-btn--${lvl}${mobileAlertLevel === lvl ? " is-sel" : ""}"
+                  data-alert-level="${lvl}">${lvl.charAt(0).toUpperCase() + lvl.slice(1)}</button>
+        `).join("")}
+      </div>
+      <div class="section-add-row">
+        <input id="alert-input" class="section-input" autocomplete="off" placeholder="Message..." inputmode="text">
+        <button class="section-add-btn" data-section-action="send-alert">${icon("plus")}</button>
+      </div>
+      ${alerts.length === 0 ? `
+        <div class="section-empty-state">
+          <p>No alerts yet. Send a Nudge, Knock, or Blast when something needs attention.</p>
+        </div>
+      ` : ""}
+      <div class="section-list">
+        ${alerts.map(a => `
+          <div class="section-alert section-alert--${a.level}">
+            <span class="alert-tag">${a.level}</span>
+            <span class="section-item-text">${safe(a.message)}</span>
+            ${!a.accepted
+              ? `<button class="section-accept-btn" data-action="accept-alert" data-id="${a.id}">Accept</button>`
+              : `<span class="alert-done-tag">✓</span>`}
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function sectionNext7() {
+    const days = [];
+    for (let i = 1; i <= 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      const key    = d.toISOString().split("T")[0];
+      const label  = d.toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "short" });
+      const events = (STATE.calendarItems || []).filter(c => c.starts_at?.startsWith(key));
+      if (events.length) days.push({ label, events });
+    }
+    return `
+      ${days.length === 0 ? `
+        <div class="section-empty-state">
+          <p>Nothing in the next 7 days. Add sport, school, bills, birthdays, or family plans.</p>
+        </div>
+      ` : ""}
+      ${days.map(d => `
+        <div class="section-group-label">${d.label}</div>
+        <div class="section-list">
+          ${d.events.map(e => `
+            <div class="section-item section-item--event">
+              <span class="section-event-time">${eventTime(e.starts_at)}</span>
+              <span class="section-item-text">${safe(e.title)}</span>
+            </div>
+          `).join("")}
+        </div>
+      `).join("")}
+    `;
+  }
+
+  function sectionInbox() {
+    const items = STATE.capturedItems || [];
+    return `
+      <div class="section-add-row">
+        <input id="inbox-input" class="section-input" autocomplete="off" placeholder="Add note..." inputmode="text">
+        <button class="section-add-btn" data-section-action="add-inbox">${icon("plus")}</button>
+      </div>
+      ${items.length === 0 ? `
+        <div class="section-empty-state">
+          <p>Inbox is empty. Use Quick Capture on the home screen to dump thoughts quickly. Items land here for you to process later.</p>
+        </div>
+      ` : ""}
+      <div class="section-list">
+        ${items.map(item => `
+          <div class="section-item" data-id="${item.id}">
+            <span class="inbox-tag inbox-tag--${item.type}">${item.type}</span>
+            <span class="section-item-text">${safe(item.text)}</span>
+            <button class="section-tick is-done" data-action="remove-captured" data-id="${item.id}" aria-label="Remove">${icon("check")}</button>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function sectionDebug() {
+    const mode    = isMobileView() ? "Mobile" : "Hub";
+    const vmSetting = STATE.appSettings?.viewMode || "auto";
+    const log     = (STATE.actionLog || []).slice(0, 20);
+    return `
+      <div class="debug-info">
+        ${[
+          ["Active layout",   mode],
+          ["View mode",       vmSetting],
+          ["Screen width",    `${window.innerWidth}px`],
+          ["Data mode",       STATE.appSettings?.dataMode || "unknown"],
+          ["Members",         (STATE.users || []).length],
+          ["Groceries",       (STATE.groceries || []).length],
+          ["Chores / tasks",  (STATE.dailyItems || []).length],
+          ["Alerts",          (STATE.alerts || []).length],
+          ["Calendar items",  (STATE.calendarItems || []).length],
+          ["Captured / inbox",(STATE.capturedItems || []).length],
+          ["localStorage",    localStorage.getItem("nosik-v3-state") ? "active" : "empty"],
+          ["Sample data",     STATE.appSettings?.dataMode === "sample" ? "yes" : "no"]
+        ].map(([k, v]) => `
+          <div class="debug-row"><span>${k}</span><strong>${safe(String(v))}</strong></div>
+        `).join("")}
+      </div>
+
+      <div class="debug-group-label">View mode override</div>
+      <div class="debug-mode-btns">
+        ${["auto","mobile","hub"].map(m => `
+          <button class="debug-mode-btn${vmSetting === m ? " is-active" : ""}" data-view-mode="${m}">${m}</button>
+        `).join("")}
+      </div>
+
+      <div class="debug-group-label">Action log (last 20)</div>
+      <div class="debug-log">
+        ${log.length ? log.map(l => `
+          <div class="debug-log-row">
+            <span class="log-time">${safe(l.time)}</span>
+            <span class="log-type">${safe(l.type)}</span>
+            <span class="log-detail">${safe(l.detail)}</span>
+          </div>
+        `).join("") : `<p class="section-empty-state">No actions yet.</p>`}
+      </div>
+
+      <div class="debug-group-label">Tools</div>
+      <div class="debug-tools">
+        <button class="debug-tool-btn" data-debug-action="export">Export backup</button>
+        <button class="debug-tool-btn debug-tool-btn--warn" data-debug-action="reset-sample">Reset sample data</button>
+        <button class="debug-tool-btn debug-tool-btn--danger" data-debug-action="reset-app">Reset app</button>
+      </div>
+      <p class="debug-notice">NOSIK is in local test mode. Data is stored on this device/browser only. Avoid adding highly sensitive details until secure sync is added.</p>
+    `;
+  }
+
+  function bindMobileSection() {
+    // Back
+    app.querySelector("[data-action='section-back']")?.addEventListener("click", () => {
+      mobileSection = null;
+      render();
+    });
+
+    // Bottom nav
+    app.querySelectorAll("[data-nav]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const nav = btn.dataset.nav;
+        if (nav === "more")     { mobileSection = "debug"; }
+        else if (nav === "lists")    { mobileSection = "groceries"; }
+        else if (nav === "calendar") { mobileSection = "next7"; }
+        else if (nav === "family")   { mobileSection = null; openPin(); return; }
+        else { mobileSection = null; }
+        render();
+      });
+    });
+
+    // Grocery add
+    const grocInput = app.querySelector("#grocery-input");
+    const grocBtn   = app.querySelector("[data-section-action='add-grocery']");
+    const doAddGroc = async () => {
+      const val = grocInput?.value.trim(); if (!val) return; grocInput.value = "";
+      checkAssistTriggers(val);
+      const { data } = await db_addGrocery(val);
+      if (data && !STATE.groceries.find(g => g.id === data.id)) STATE.groceries.push(data);
+      logAction("added-grocery", val); render();
+    };
+    grocInput?.addEventListener("keydown", e => { if (e.key === "Enter") doAddGroc(); });
+    grocBtn?.addEventListener("click", doAddGroc);
+
+    // Chore add
+    const choreInput = app.querySelector("#chore-input");
+    const choreBtn   = app.querySelector("[data-section-action='add-chore']");
+    const doAddChore = async () => {
+      const val = choreInput?.value.trim(); if (!val) return; choreInput.value = "";
+      const { data } = await db_addDailyItem(val, null);
+      if (data && !STATE.dailyItems.find(i => i.id === data.id)) STATE.dailyItems.push(data);
+      logAction("added-task", val); render();
+    };
+    choreInput?.addEventListener("keydown", e => { if (e.key === "Enter") doAddChore(); });
+    choreBtn?.addEventListener("click", doAddChore);
+
+    // Today add
+    const todayInput = app.querySelector("#today-input");
+    const todayBtn   = app.querySelector("[data-section-action='add-today']");
+    const doAddToday = async () => {
+      const val = todayInput?.value.trim(); if (!val) return; todayInput.value = "";
+      const { data } = await db_addDailyItem(val, null);
+      if (data && !STATE.dailyItems.find(i => i.id === data.id)) STATE.dailyItems.push(data);
+      logAction("added-task", val); render();
+    };
+    todayInput?.addEventListener("keydown", e => { if (e.key === "Enter") doAddToday(); });
+    todayBtn?.addEventListener("click", doAddToday);
+
+    // Inbox add
+    const inboxInput = app.querySelector("#inbox-input");
+    const inboxBtn   = app.querySelector("[data-section-action='add-inbox']");
+    const doAddInbox = () => {
+      const val = inboxInput?.value.trim(); if (!val) return; inboxInput.value = "";
+      if (!STATE.capturedItems) STATE.capturedItems = [];
+      STATE.capturedItems.unshift({ id: uid("cap"), text: val, type: "inbox", createdAt: new Date().toISOString() });
+      logAction("captured-item", `inbox: ${val}`); saveState(); render();
+    };
+    inboxInput?.addEventListener("keydown", e => { if (e.key === "Enter") doAddInbox(); });
+    inboxBtn?.addEventListener("click", doAddInbox);
+
+    // Alert level toggle
+    app.querySelectorAll("[data-alert-level]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        mobileAlertLevel = btn.dataset.alertLevel;
+        app.querySelectorAll("[data-alert-level]").forEach(b => b.classList.remove("is-sel"));
+        btn.classList.add("is-sel");
+      });
+    });
+
+    // Alert send
+    const alertInput = app.querySelector("#alert-input");
+    const alertBtn   = app.querySelector("[data-section-action='send-alert']");
+    const doSendAlert = async () => {
+      const msg = alertInput?.value.trim(); if (!msg) return; alertInput.value = "";
+      const { data } = await db_sendAlert(mobileAlertLevel, msg);
+      if (data && !STATE.alerts.find(a => a.id === data.id)) STATE.alerts.unshift(data);
+      logAction("added-alert", `${mobileAlertLevel}: ${msg}`); render();
+    };
+    alertInput?.addEventListener("keydown", e => { if (e.key === "Enter") doSendAlert(); });
+    alertBtn?.addEventListener("click", doSendAlert);
+
+    // Accept alert
+    app.querySelectorAll("[data-action='accept-alert']").forEach(btn => {
+      btn.addEventListener("click", () => acceptAlert(btn.dataset.id));
+    });
+
+    // Remove captured
+    app.querySelectorAll("[data-action='remove-captured']").forEach(btn => {
+      btn.addEventListener("click", () => {
+        STATE.capturedItems = (STATE.capturedItems || []).filter(i => i.id !== btn.dataset.id);
+        saveState(); render();
+      });
+    });
+
+    // Ticks
+    app.querySelectorAll("[data-tick]").forEach(btn => {
+      btn.addEventListener("click", () => tickItem(btn.dataset.tick, btn.dataset.id));
+    });
+
+    // Debug tools
+    app.querySelectorAll("[data-view-mode]").forEach(btn => {
+      btn.addEventListener("click", () => { setViewMode(btn.dataset.viewMode); render(); });
+    });
+    app.querySelector("[data-debug-action='export']")?.addEventListener("click", exportBackup);
+    app.querySelector("[data-debug-action='reset-sample']")?.addEventListener("click", () => {
+      if (confirm("Clear sample data? Your real data stays.")) {
+        if (!STATE.appSettings) STATE.appSettings = {};
+        STATE.appSettings.dataMode = "real";
+        logAction("reset-sample", "Sample data cleared");
+        saveState(); render();
+      }
+    });
+    app.querySelector("[data-debug-action='reset-app']")?.addEventListener("click", () => {
+      if (confirm("Reset ALL data? This cannot be undone.")) {
+        if (confirm("Are you sure? Everything will be deleted.")) {
+          resetApp(); render();
+        }
+      }
+    });
+
+    // PIN / blast
+    app.querySelectorAll("[data-action='open-pin']").forEach(b => b.addEventListener("click", openPin));
+    app.querySelectorAll("[data-pin]").forEach(b => b.addEventListener("click", () => pinPress(b.dataset.pin)));
+    app.querySelector("[data-action='login']")?.addEventListener("click", submitPin);
+    app.querySelector("[data-action='close-pin']")?.addEventListener("click", closePin);
+    app.querySelector("[data-action='accept-blast']")?.addEventListener("click", e => acceptBlast(e.target.dataset.id));
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // STARTUP
+  // ═══════════════════════════════════════════════════════════
+
   stopSync = startSync(render);
-  window.addEventListener("resize", syncParentHudScale);
+  window.addEventListener("resize", () => { syncParentHudScale(); render(); });
   window.addEventListener("beforeunload", () => stopSync?.());
   window.setInterval(render, 60000);
   applyAnimation();
