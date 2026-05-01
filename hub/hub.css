@@ -1534,7 +1534,7 @@
 .parent-topbar {
   min-height: 112px;
   padding: 26px 38px 22px;
-  background: #0d121a;
+  background: #212645;
 }
 
 .parent-brand {
@@ -1614,7 +1614,7 @@
 
 .parent-central {
   padding: 30px 38px 28px;
-  background: #0d121a;
+  background: #212645;
 }
 
 .central-label {
@@ -1882,7 +1882,7 @@
   justify-content: flex-start;
   gap: 64px;
   padding: 16px 54px;
-  background: #0d121a;
+  background: #212645;
 }
 
 .dock-spacer {
@@ -1939,7 +1939,7 @@
   height: 100dvh;
   min-height: 100dvh;
   overflow: hidden;
-  background: #02050a;
+  background: #1a1f3a;
 }
 
 .hub-shell.is-parent-shell .hub-main {
@@ -1951,17 +1951,17 @@
 }
 
 .parent-home {
-  --hud-bg: #0a0f16;
-  --hud-panel: #0d121a;
-  --hud-line: #202631;
+  --hud-bg:      #1a1f3a;
+  --hud-panel:   #212645;
+  --hud-line:    rgba(255,255,255,0.10);
   --hud-soft-line: rgba(255, 255, 255, 0.06);
-  --hud-text: #eff3f7;
-  --hud-muted: #9098a3;
-  --hud-dim: #555d69;
-  --hud-gold: #d8ad3e;
-  --hud-red: #ff5b54;
-  --hud-blue: #58a6ff;
-  --hud-green: #3fd466;
+  --hud-text:  #f0ece4;
+  --hud-muted: rgba(240,236,228,0.55);
+  --hud-dim:   rgba(240,236,228,0.30);
+  --hud-gold:  #d4845a;
+  --hud-red:   #e05a5a;
+  --hud-blue:  #5b9bd5;
+  --hud-green: #4caf87;
   width: min(100%, 1376px);
   height: 100dvh;
   min-height: 0;
@@ -1990,7 +1990,7 @@
   height: 60px;
   border-radius: 12px;
   background: var(--hud-gold);
-  color: #080b0f;
+  color: #fff;
   font-size: 27px;
   box-shadow: none;
 }
@@ -2038,8 +2038,8 @@
   min-height: 62px;
   padding: 0 38px;
   gap: 36px;
-  border-bottom: 1px solid rgba(216, 173, 62, 0.18);
-  background: rgba(216, 173, 62, 0.025);
+  border-bottom: 1px solid rgba(212, 132, 90, 0.18);
+  background: rgba(212, 132, 90, 0.025);
 }
 
 .legend-item {
@@ -2056,7 +2056,7 @@
 }
 
 .swatch--help {
-  background: rgba(216, 173, 62, 0.18);
+  background: rgba(212, 132, 90, 0.18);
   border-left: 4px solid var(--hud-gold);
 }
 
@@ -2155,7 +2155,7 @@
 
 .parent-task.can-help {
   border-left-color: var(--hud-gold);
-  background: rgba(216, 173, 62, 0.065);
+  background: rgba(212, 132, 90, 0.065);
 }
 
 .parent-task.urgent-task {
@@ -2210,9 +2210,9 @@
   justify-content: center;
   gap: 8px;
   padding: 6px 12px;
-  border: 1px solid rgba(216, 173, 62, 0.42);
+  border: 1px solid rgba(212, 132, 90, 0.42);
   border-radius: 999px;
-  background: rgba(216, 173, 62, 0.1);
+  background: rgba(212, 132, 90, 0.1);
   color: var(--hud-gold);
   font-size: 15px;
 }
@@ -2261,7 +2261,7 @@
 }
 
 .bill-soon {
-  background: rgba(216, 173, 62, 0.16);
+  background: rgba(212, 132, 90, 0.16);
   color: var(--hud-gold);
 }
 
@@ -2634,7 +2634,7 @@
   min-height: 100dvh;
   overflow-x: hidden;
   overflow-y: auto;
-  background: #02050a;
+  background: #1a1f3a;
 }
 
 .hub-shell.is-parent-shell .hub-main {
@@ -2898,9 +2898,9 @@
 
 .setup-action {
   min-height: 48px;
-  border: 1px solid rgba(216, 173, 62, 0.32);
+  border: 1px solid rgba(212, 132, 90, 0.32);
   border-radius: 12px;
-  background: rgba(216, 173, 62, 0.08);
+  background: rgba(212, 132, 90, 0.08);
   color: var(--hud-gold);
   font-weight: var(--w-bold);
   padding: 0 18px;
@@ -2985,7 +2985,7 @@
   min-width: 72px;
   justify-self: end;
   border-radius: 999px;
-  background: rgba(216, 173, 62, 0.14);
+  background: rgba(212, 132, 90, 0.14);
   color: var(--hud-gold);
   font-size: 14px;
   font-style: normal;
